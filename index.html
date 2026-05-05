@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mock prototype cho giải pháp học tập - Peer Pressure & Distraction Memo">
+    <title>StudyBuddy - Môi trường học tập hiệu quả</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ===== NAVIGATION TABS ===== -->
+    <nav id="main-nav">
+        <div class="nav-brand">
+            <span class="brand-icon">📚</span>
+            <span class="brand-text">StudyBuddy</span>
+        </div>
+        <div class="nav-tabs">
+            <button id="nav-tab-peer" class="nav-tab active" onclick="switchSolution('peer')">
+                <span class="tab-icon">👥</span>
+                <span>Phòng học nhóm</span>
+            </button>
+            <button id="nav-tab-memo" class="nav-tab" onclick="switchSolution('memo')">
+                <span class="tab-icon">🧠</span>
+                <span>Distraction Memo</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== SOLUTION 1: PEER PRESSURE ===== -->
+    <div id="peer-section" class="solution-section active">
+
+        <!-- Screen 1: Home -->
+        <div id="peer-home" class="screen active">
+            <div class="hero-container">
+                <div class="hero-glow"></div>
+                <div class="hero-content">
+                    <div class="hero-badge">✨ Giải pháp 1</div>
+                    <h1>Môi trường tự học Online</h1>
+                    <p class="hero-subtitle">Cùng học, cùng tiến bộ. Tạo áp lực tích cực từ bạn bè để duy trì sự tập trung.</p>
+                    
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="online-count">12</span>
+                            <span class="stat-label">Đang online</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-number">5</span>
+                            <span class="stat-label">Phòng học</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-number">89%</span>
+                            <span class="stat-label">Hoàn thành</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button id="btn-create-room" class="btn btn-primary btn-lg" onclick="showCreateRoom()">
+                            <span class="btn-icon">➕</span>
+                            Tạo phòng học
+                        </button>
+                        <button id="btn-join-room" class="btn btn-secondary btn-lg" onclick="joinRoom()">
+                            <span class="btn-icon">🚪</span>
+                            Tham gia phòng
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Floating avatars decoration -->
+                <div class="floating-avatars">
+                    <div class="float-avatar" style="--delay: 0s; --x: 10%; --y: 20%;">👨‍💻</div>
+                    <div class="float-avatar" style="--delay: 1s; --x: 85%; --y: 15%;">👩‍💻</div>
+                    <div class="float-avatar" style="--delay: 2s; --x: 75%; --y: 70%;">📖</div>
+                    <div class="float-avatar" style="--delay: 0.5s; --x: 15%; --y: 75%;">🎯</div>
+                    <div class="float-avatar" style="--delay: 1.5s; --x: 50%; --y: 85%;">💡</div>
+                </div>
+            </div>
+
+            <!-- Room list preview -->
+            <div class="room-list-section">
+                <h2 class="section-title">Phòng học đang hoạt động</h2>
+                <div class="room-cards">
+                    <div class="room-card" onclick="joinRoom()">
+                        <div class="room-card-header">
+                            <span class="room-emoji">🖥️</span>
+                            <span class="room-badge live">LIVE</span>
+                        </div>
+                        <h3>Nhóm ITSS - Sprint Review</h3>
+                        <p>Cùng nhau code đồ án cuối kỳ</p>
+                        <div class="room-members-preview">
+                            <span class="member-dot" style="background: #6C5CE7;">L</span>
+                            <span class="member-dot" style="background: #00B894;">H</span>
+                            <span class="member-dot" style="background: #E17055;">T</span>
+                            <span class="member-count">+2</span>
+                        </div>
+                    </div>
+                    <div class="room-card" onclick="joinRoom()">
+                        <div class="room-card-header">
+                            <span class="room-emoji">📐</span>
+                            <span class="room-badge live">LIVE</span>
+                        </div>
+                        <h3>Ôn thi Giải tích</h3>
+                        <p>Giải bài tập chương 5-6</p>
+                        <div class="room-members-preview">
+                            <span class="member-dot" style="background: #FDCB6E;">A</span>
+                            <span class="member-dot" style="background: #74B9FF;">M</span>
+                            <span class="member-count">+1</span>
+                        </div>
+                    </div>
+                    <div class="room-card create-new" onclick="showCreateRoom()">
+                        <div class="create-icon">+</div>
+                        <h3>Tạo phòng mới</h3>
+                        <p>Bắt đầu phiên học của bạn</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Room Modal -->
+        <div id="create-room-modal" class="modal-overlay" onclick="closeModal(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <button class="modal-close" onclick="hideCreateRoom()">✕</button>
+                <h2>🏠 Tạo phòng học mới</h2>
+                <div class="form-group">
+                    <label for="room-name">Tên phòng</label>
+                    <input type="text" id="room-name" placeholder="VD: Nhóm ITSS - Code đồ án" value="Nhóm ITSS - Sprint Review">
+                </div>
+                <div class="form-group">
+                    <label for="room-desc">Mô tả (tuỳ chọn)</label>
+                    <input type="text" id="room-desc" placeholder="VD: Cùng nhau hoàn thành task tuần này" value="Cùng nhau code đồ án cuối kỳ">
+                </div>
+                <div class="form-group">
+                    <label>Chế độ phòng</label>
+                    <div class="radio-group">
+                        <label class="radio-option active">
+                            <input type="radio" name="room-mode" value="public" checked>
+                            <span class="radio-icon">🌍</span>
+                            <span>Công khai</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="room-mode" value="private">
+                            <span class="radio-icon">🔒</span>
+                            <span>Riêng tư</span>
+                        </label>
+                    </div>
+                </div>
+                <button id="btn-confirm-create" class="btn btn-primary btn-block" onclick="joinRoom()">
+                    Tạo và vào phòng →
+                </button>
+            </div>
+        </div>
+
+        <!-- Screen 2: In Room -->
+        <div id="peer-room" class="screen">
+            <div class="room-header">
+                <div class="room-header-left">
+                    <button id="btn-back-home" class="btn-icon-only" onclick="backToHome()">←</button>
+                    <div class="room-info">
+                        <h2>🖥️ Nhóm ITSS - Sprint Review</h2>
+                        <span class="room-timer" id="room-timer">⏱️ 00:00:00</span>
+                    </div>
+                </div>
+                <div class="room-header-right">
+                    <button id="btn-invite" class="btn btn-ghost" onclick="showToast('Đã copy link mời!')">
+                        📋 Mời bạn bè
+                    </button>
+                    <button id="btn-leave-room" class="btn btn-danger-outline" onclick="backToHome()">
+                        Rời phòng
+                    </button>
+                </div>
+            </div>
+
+            <div class="room-body">
+                <!-- Members Grid -->
+                <div class="members-grid">
+                    <!-- Current user -->
+                    <div class="member-card is-you" id="my-card">
+                        <div class="member-camera" id="my-camera">
+                            <div class="camera-placeholder">
+                                <span class="camera-emoji">😊</span>
+                                <span>Camera tắt</span>
+                            </div>
+                        </div>
+                        <div class="member-info">
+                            <div class="member-name">
+                                <span class="status-dot online"></span>
+                                Bạn (Tôi)
+                                <span class="you-badge">YOU</span>
+                            </div>
+                            <div class="member-status" id="my-status-text">🖥️ Đang code</div>
+                        </div>
+                        <div class="member-actions">
+                            <button id="btn-toggle-camera" class="btn btn-sm btn-ghost" onclick="toggleCamera()">
+                                📷 Bật Camera
+                            </button>
+                            <button id="btn-change-status" class="btn btn-sm btn-ghost" onclick="showStatusPicker()">
+                                ✏️ Đổi trạng thái
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Member: Long -->
+                    <div class="member-card" id="card-long">
+                        <div class="member-camera active">
+                            <div class="camera-active-view">
+                                <span class="big-emoji">👨‍💻</span>
+                            </div>
+                            <span class="camera-badge">📷 ON</span>
+                        </div>
+                        <div class="member-info">
+                            <div class="member-name">
+                                <span class="status-dot online"></span>
+                                Long
+                            </div>
+                            <div class="member-status">🖥️ Đang code</div>
+                        </div>
+                        <div class="member-focus-bar">
+                            <div class="focus-label">Tập trung</div>
+                            <div class="focus-track">
+                                <div class="focus-fill" style="width: 85%;"></div>
+                            </div>
+                            <div class="focus-value">85%</div>
+                        </div>
+                    </div>
+
+                    <!-- Member: Hình -->
+                    <div class="member-card" id="card-hinh">
+                        <div class="member-camera active">
+                            <div class="camera-active-view">
+                                <span class="big-emoji">👩‍💻</span>
+                            </div>
+                            <span class="camera-badge">📷 ON</span>
+                        </div>
+                        <div class="member-info">
+                            <div class="member-name">
+                                <span class="status-dot online pulse"></span>
+                                Hình
+                            </div>
+                            <div class="member-status">🔥 Tập trung cao độ</div>
+                        </div>
+                        <div class="member-focus-bar">
+                            <div class="focus-label">Tập trung</div>
+                            <div class="focus-track">
+                                <div class="focus-fill high" style="width: 95%;"></div>
+                            </div>
+                            <div class="focus-value">95%</div>
+                        </div>
+                    </div>
+
+                    <!-- Member: Tùng -->
+                    <div class="member-card" id="card-tung">
+                        <div class="member-camera">
+                            <div class="camera-placeholder">
+                                <span class="camera-emoji">😴</span>
+                                <span>Camera tắt</span>
+                            </div>
+                        </div>
+                        <div class="member-info">
+                            <div class="member-name">
+                                <span class="status-dot away"></span>
+                                Tùng
+                            </div>
+                            <div class="member-status">☕ Nghỉ giải lao</div>
+                        </div>
+                        <div class="member-focus-bar">
+                            <div class="focus-label">Tập trung</div>
+                            <div class="focus-track">
+                                <div class="focus-fill low" style="width: 30%;"></div>
+                            </div>
+                            <div class="focus-value">30%</div>
+                        </div>
+                    </div>
+
+                    <!-- Member: An -->
+                    <div class="member-card" id="card-an">
+                        <div class="member-camera active">
+                            <div class="camera-active-view">
+                                <span class="big-emoji">🧑‍🎓</span>
+                            </div>
+                            <span class="camera-badge">📷 ON</span>
+                        </div>
+                        <div class="member-info">
+                            <div class="member-name">
+                                <span class="status-dot online"></span>
+                                An
+                            </div>
+                            <div class="member-status">📖 Đọc tài liệu</div>
+                        </div>
+                        <div class="member-focus-bar">
+                            <div class="focus-label">Tập trung</div>
+                            <div class="focus-track">
+                                <div class="focus-fill" style="width: 72%;"></div>
+                            </div>
+                            <div class="focus-value">72%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat sidebar -->
+                <div class="chat-sidebar">
+                    <h3>💬 Tin nhắn nhóm</h3>
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-msg system">Phòng học đã bắt đầu!</div>
+                        <div class="chat-msg">
+                            <span class="chat-author" style="color: #6C5CE7;">Long:</span>
+                            <span>Mình bắt đầu code phần backend nhé</span>
+                        </div>
+                        <div class="chat-msg">
+                            <span class="chat-author" style="color: #00B894;">Hình:</span>
+                            <span>Ok, mình làm phần UI 👍</span>
+                        </div>
+                        <div class="chat-msg">
+                            <span class="chat-author" style="color: #FDCB6E;">An:</span>
+                            <span>Mình đọc spec trước nha</span>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Nhắn tin..." onkeydown="if(event.key==='Enter')sendChat()">
+                        <button id="btn-send-chat" class="btn btn-primary btn-sm" onclick="sendChat()">Gửi</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Picker -->
+            <div id="status-picker" class="status-picker hidden">
+                <div class="status-picker-content">
+                    <h3>Chọn trạng thái của bạn</h3>
+                    <div class="status-options">
+                        <button class="status-option" onclick="setStatus('🖥️ Đang code')">🖥️ Đang code</button>
+                        <button class="status-option" onclick="setStatus('📖 Đọc tài liệu')">📖 Đọc tài liệu</button>
+                        <button class="status-option" onclick="setStatus('🔥 Tập trung cao độ')">🔥 Tập trung cao độ</button>
+                        <button class="status-option" onclick="setStatus('✍️ Viết báo cáo')">✍️ Viết báo cáo</button>
+                        <button class="status-option" onclick="setStatus('☕ Nghỉ giải lao')">☕ Nghỉ giải lao</button>
+                        <button class="status-option" onclick="setStatus('🤔 Đang suy nghĩ')">🤔 Đang suy nghĩ</button>
+                        <button class="status-option" onclick="setStatus('🎨 Thiết kế UI')">🎨 Thiết kế UI</button>
+                        <button class="status-option" onclick="setStatus('🐛 Debug')">🐛 Debug</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SOLUTION 2: DISTRACTION MEMO ===== -->
+    <div id="memo-section" class="solution-section">
+
+        <!-- Screen 1: Studying -->
+        <div id="memo-study" class="screen active">
+            <div class="memo-container">
+                <div class="memo-hero">
+                    <div class="hero-badge">🧠 Giải pháp 2</div>
+                    <h1>Distraction Memo</h1>
+                    <p class="hero-subtitle">Ghi lại suy nghĩ xao nhãng, giữ vững sự tập trung. Chỉ "trả nợ" sau khi hết giờ học.</p>
+                </div>
+
+                <!-- Timer display -->
+                <div class="memo-timer-display">
+                    <div class="timer-ring">
+                        <svg viewBox="0 0 200 200">
+                            <circle cx="100" cy="100" r="90" class="timer-ring-bg"/>
+                            <circle cx="100" cy="100" r="90" class="timer-ring-progress" id="timer-ring-progress"/>
+                        </svg>
+                        <div class="timer-text">
+                            <span class="timer-value" id="memo-timer-value">25:00</span>
+                            <span class="timer-label" id="memo-timer-label">Chưa bắt đầu</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer controls -->
+                <div class="timer-controls" id="timer-controls-start">
+                    <div class="timer-presets">
+                        <button class="preset-btn active" onclick="setTimerPreset(25, this)">25 phút</button>
+                        <button class="preset-btn" onclick="setTimerPreset(45, this)">45 phút</button>
+                        <button class="preset-btn" onclick="setTimerPreset(60, this)">60 phút</button>
+                    </div>
+                    <button id="btn-start-session" class="btn btn-primary btn-lg" onclick="startStudySession()">
+                        ▶️ Bắt đầu phiên học
+                    </button>
+                </div>
+
+                <!-- Distraction input (hidden until session starts) -->
+                <div class="distraction-input-area hidden" id="distraction-area">
+                    <div class="distraction-prompt">
+                        <div class="prompt-icon">💭</div>
+                        <h3>Bị xao nhãng? Ghi lại ở đây!</h3>
+                        <p>Viết ra rồi quên đi. Bạn sẽ xử lý sau khi hết giờ.</p>
+                    </div>
+                    <div class="distraction-form">
+                        <input type="text" id="distraction-input" placeholder='VD: "Check tin nhắn lớp", "Xem story Instagram"...' onkeydown="if(event.key==='Enter')saveDistraction()">
+                        <button id="btn-save-distraction" class="btn btn-primary" onclick="saveDistraction()">
+                            📥 Lưu vào kho
+                        </button>
+                    </div>
+
+                    <!-- Saved count indicator -->
+                    <div class="saved-indicator" id="saved-indicator">
+                        <div class="vault-icon">🔒</div>
+                        <span>Đã lưu <strong id="distraction-count">0</strong> suy nghĩ xao nhãng</span>
+                        <div class="vault-hint">Sẽ mở khóa khi hết giờ học</div>
+                    </div>
+
+                    <button id="btn-end-session" class="btn btn-danger-outline btn-lg" onclick="endStudySession()" style="margin-top: 24px;">
+                        ⏹️ Kết thúc phiên học
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Session End / Review -->
+        <div id="memo-review" class="screen">
+            <div class="review-container">
+                <div class="review-header">
+                    <div class="review-celebration">🎉</div>
+                    <h1>Phiên học kết thúc!</h1>
+                    <p class="review-subtitle">Đây là danh sách những suy nghĩ xao nhãng của bạn. Bây giờ bạn có thể "trả nợ"!</p>
+                </div>
+
+                <div class="review-stats">
+                    <div class="review-stat">
+                        <span class="review-stat-icon">⏱️</span>
+                        <span class="review-stat-value" id="review-time">25:00</span>
+                        <span class="review-stat-label">Thời gian học</span>
+                    </div>
+                    <div class="review-stat">
+                        <span class="review-stat-icon">💭</span>
+                        <span class="review-stat-value" id="review-count">0</span>
+                        <span class="review-stat-label">Lần xao nhãng</span>
+                    </div>
+                    <div class="review-stat">
+                        <span class="review-stat-icon">🏆</span>
+                        <span class="review-stat-value" id="review-score">A+</span>
+                        <span class="review-stat-label">Đánh giá</span>
+                    </div>
+                </div>
+
+                <div class="review-list-section">
+                    <h2>📋 Danh sách "nợ" cần trả</h2>
+                    <div class="review-list" id="review-list">
+                        <!-- Items will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="review-actions">
+                    <button id="btn-new-session" class="btn btn-primary btn-lg" onclick="resetMemo()">
+                        🔄 Bắt đầu phiên mới
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast hidden">
+        <span id="toast-msg"></span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
