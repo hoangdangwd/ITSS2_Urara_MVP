@@ -208,7 +208,10 @@ const RoomPage = {
 
     _renderMemberCard(member) {
         const cameraHtml = member.cameraOn
-            ? `<div class="camera-active-view"><span class="big-emoji">${member.avatar}</span></div><span class="camera-badge">📷 ON</span>`
+            ? `<div class="camera-active-view">
+                   <video data-peer-id="${member.id}" autoplay playsinline class="local-video"></video>
+                   <span class="big-emoji" style="display: none;">${member.avatar}</span>
+               </div><span class="camera-badge">📷 ON</span>`
             : `<div class="camera-placeholder"><span class="camera-emoji">${member.avatar}</span><span>Camera tắt</span></div>`;
         const dotClass = member.cameraOn ? 'online' : 'away';
         // Task 11: Mic glow class and icon
