@@ -1,0 +1,502 @@
+表2：進捗管理表									
+No	実用最小限の機能	タスク	開発期限	担当者	詳細(ベトナム語OK)	見積もり(h)	進捗状況	問題点・原因・対策（ベトナム語OK）	メモ（ベトナム語OK）
+1	"学習・コーディング中にお互いの様子を共有し、監視し合うためのビデオ共有機能
+Chức năng chia sẻ video giám sát lẫn nhau"	"
+
+ビデオ学習ルームUIの設計
+- Thiết kế UI phòng học video
+
+
+"	22h 23/5/2026	Nguyễn Trung Tường	"1. Thiết kế giao diện phòng học video
+・Thiết kế layout hiển thị video nhiều người dùng
+・Thiết kế khu vực hiển thị camera của bản thân
+・Thiết kế danh sách/thông tin người tham gia room
+・Thiết kế button camera ON/OFF và mute/unmute microphone
+2. Thiết kế trạng thái giao diện
+・Hiển thị trạng thái camera/microphone của user
+・Hiển thị trạng thái tham gia/rời room
+・Thiết kế loading/waiting state cơ bản
+3. Responsive UI
+・Hỗ trợ hiển thị trên nhiều kích thước màn hình
+・Điều chỉnh layout khi số lượng user thay đổi
+4. Đầu ra
+・Hoàn thành mockup/UI màn hình phòng video học tập
+・Có thể tích hợp với chức năng realtime/video trong các task tiếp theo"	5	100	"- Vấn đề: Bố cục (Layout) bị vỡ khi người dùng thay đổi kích thước cửa sổ ứng dụng (resize window) trên màn hình desktop.
+
+
+- Xử lý hiện tại: Thiết lập kích thước cửa sổ tĩnh (cố định) cho bản MVP.
+
+
+- Phòng ngừa: Thiết kế giao diện theo cơ chế Responsive Window, tự động sắp xếp lại dạng lưới (Grid) khi phóng to/thu nhỏ cửa sổ."	
+2	"学習・コーディング中にお互いの様子を共有し、監視し合うためのビデオ共有機能
+Chức năng chia sẻ video giám sát lẫn nhau"	"カメラ／Webカメラの統合
+- Tích hợp camera/webcam
+"	22h 26/5/2026	Trịnh Minh Đạt	"1. Tích hợp camera/webcam vào hệ thống
+・Kết nối webcam từ trình duyệt/thết bị người dùng
+・Lấy video stream từ camera
+・Hiển thị video của bản thân trên màn hình
+
+2. Xử lý quyền truy cập thiết bị
+・Yêu cầu quyền truy cập camera từ người dùng
+・Kiểm tra trạng thái cho phép/từ chối quyền truy cập
+3. Xử lý trạng thái camera
+・Khởi tạo camera khi tham gia room
+・Dừng camera khi thoát room hoặc tắt camera
+4. Đầu ra
+・Hiển thị được video realtime từ webcam người dùng
+・Nếu không thể truy cập camera, hiển thị message lỗi phù hợp"	8	100	"- Vấn đề: Lỗi không nhận diện được luồng camera do thiết bị đang bị chiếm quyền bởi một ứng dụng hội thoại khác chạy ngầm trên máy tính (như Zoom, Teams).
+
+
+- Xử lý hiện tại: Hiển thị thông báo nhắc nhở người dùng tự kiểm tra và đóng các ứng dụng đang dùng camera.
+
+
+- Phòng ngừa: Xây dựng khái niệm quản lý xung đột thiết bị, tự động rà quét và cảnh báo chính xác ứng dụng nào đang giữ quyền kiểm soát phần cứng."	
+3	"学習・コーディング中にお互いの様子を共有し、監視し合うためのビデオ共有機能
+Chức năng chia sẻ video giám sát lẫn nhau"	"マルチユーザービデオを表示する
+- Hiển thị video nhiều người dùng
+"	22h 28/5/2026	Đặng Huy Hoàng	"1. Xây dựng giao diện hiển thị video nhiều người dùng
+・Hiển thị video của nhiều user trong cùng room
+・Sắp xếp layout video theo dạng grid/list
+・Hiển thị thông tin cơ bản của user trên video
+2. Xử lý cập nhật video realtime
+・Hiển thị video khi user tham gia room
+・Ẩn video khi user rời room
+・Cập nhật số lượng user đang tham gia
+3. Xử lý trạng thái hiển thị
+・Hiển thị trạng thái camera ON/OFF của user
+・Hiển thị placeholder khi camera tắt hoặc chưa kết nối
+4. Đầu ra
+・Hiển thị đồng thời video của nhiều người dùng trong room
+・Cập nhật realtime khi user tham gia/rời room hoặc thay đổi trạng thái camera"	8	100	"- Vấn đề: Việc render quá nhiều video chất lượng cao cùng lúc gây ngốn CPU và RAM, làm máy tính bị đơ/nóng.
+
+
+- Xử lý hiện tại: Giới hạn số lượng video hiển thị đồng thời trên màn hình (tối đa 4-6 người).
+
+
+- Phòng ngừa: Đưa ra giải pháp khái niệm về cơ chế tự động giảm độ phân giải video hoặc chỉ hiển thị video của người đang phát biểu (Active Speaker)."	
+4	"学習・コーディング中にお互いの様子を共有し、監視し合うためのビデオ共有機能
+Chức năng chia sẻ video giám sát lẫn nhau"	"カメラのオン/オフ操作
+- Xử lý bật/tắt camera
+"	22h 29/5/2026	Trịnh Minh Đạt	"1. Xây dựng chức năng bật/tắt camera
+・Cho phép user bật hoặc tắt camera trong room
+・Điều khiển trạng thái video stream của camera
+2. Đồng bộ trạng thái camera
+・Cập nhật trạng thái camera ON/OFF realtime
+・Đồng bộ trạng thái camera tới các user khác trong room
+3. Cập nhật giao diện hiển thị
+・Hiển thị icon/trạng thái camera hiện tại
+・Hiển thị placeholder khi camera bị tắt
+4. Đầu ra
+・User có thể bật/tắt camera thành công
+・Các user trong room thấy được trạng thái camera được cập nhật realtime"	4			
+5	"学習・コーディング中にお互いの様子を共有し、監視し合うためのビデオ共有機能
+Chức năng chia sẻ video giám sát lẫn nhau"	"ルーム内のユーザーのステータスを同期する
+- Đồng bộ trạng thái người dùng trong room
+"	22h 31/5/2026	Nguyễn Trọng Hinh	"1. Xây dựng chức năng đồng bộ trạng thái user trong room
+・Đồng bộ trạng thái tham gia/rời room của user
+・Đồng bộ trạng thái camera/microphone của user
+2. Cập nhật dữ liệu realtime
+・Cập nhật danh sách user đang online trong room
+・Cập nhật trạng thái user khi có thay đổi
+3. Cập nhật giao diện hiển thị
+・Hiển thị trạng thái hiện tại của từng user
+・Cập nhật realtime khi user join/leave hoặc thay đổi trạng thái
+4.Đầu ra
+・Trạng thái user trong room được đồng bộ realtime giữa các người dùng
+・Danh sách và trạng thái user được cập nhật chính xác trên giao diện"	6			
+6	"学習・コーディング中にお互いの様子を共有し、監視し合うためのビデオ共有機能
+Chức năng chia sẻ video giám sát lẫn nhau"	"カメラのアクセス権限を確認してください
+- Kiểm tra quyền truy cập camera"	22h 24/5/2026	Nguyễn Trọng Hinh	"1. Xây dựng chức năng kiểm tra quyền truy cập camera
+・Kiểm tra trạng thái quyền truy cập camera của trình duyệt/thết bị
+・Yêu cầu cấp quyền truy cập camera khi cần
+2. Xử lý trạng thái quyền truy cập
+・Xử lý trường hợp user cho phép truy cập camera
+・Xử lý trường hợp user từ chối quyền truy cập camera
+3. Cập nhật giao diện hiển thị
+・Hiển thị thông báo trạng thái quyền truy cập camera
+・Hiển thị message lỗi khi không thể sử dụng camera
+4.Đầu ra
+・Hệ thống xác định được trạng thái quyền truy cập camera
+・Hiển thị camera nếu quyền truy cập hợp lệ
+・Hiển thị message lỗi nếu không có quyền truy cập camera"	2	100	"- Vấn đề: Người dùng đã chặn quyền truy cập camera ở cấp độ bảo mật của hệ điều hành (Windows Privacy Settings / macOS System Settings).
+
+
+- Xử lý hiện tại: Bắt lỗi kết nối và hiển thị hướng dẫn bằng văn bản để người dùng tự vào Cài đặt hệ điều hành mở quyền.
+
+
+- Phòng ngừa: Bổ sung nút liên kết trực tiếp (Deep link tới OS Settings) mở thẳng trang cài đặt quyền camera của hệ điều hành."	
+7	"学習・コーディング中にお互いの様子を共有し、監視し合うためのビデオ共有機能
+Chức năng chia sẻ video giám sát lẫn nhau"	"例外処理
+- Xử lý ngoại lệ"	22h 2/6/2026	Nguyễn Trung Tường	"1. Xây dựng xử lý ngoại lệ cho chức năng video room
+・Xử lý lỗi không thể kết nối camera/microphone
+・Xử lý lỗi mất kết nối realtime
+・Xử lý lỗi tham gia room thất bại
+2. Xử lý trạng thái hệ thống
+・Kiểm tra trạng thái kết nối của user
+・Xử lý trường hợp user rời room bất thường
+3. Cập nhật giao diện lỗi
+・Hiển thị message lỗi phù hợp theo từng trường hợp
+・Hiển thị trạng thái loading/reconnecting cơ bản
+4. Đầu ra
+・Hệ thống xử lý được các lỗi cơ bản trong quá trình sử dụng video room
+・User nhận được thông báo lỗi phù hợp khi xảy ra sự cố"	3			
+8	"""完全消音・マイク強制ミュート機能 
+Chức năng tắt tiếng hoàn toàn/tắt micrô bắt buộc"""	"内蔵マイク
+- Tích hợp microphone
+"	22h 26/5/2026	Phan Hồng Minh	"1. Xây dựng chức năng kiểm tra quyền truy cập microphone
+・Kiểm tra trạng thái quyền truy cập microphone của trình duyệt/thiết bị
+・Yêu cầu cấp quyền truy cập microphone khi cần
+2. Xử lý trạng thái quyền truy cập
+・Xử lý trường hợp user cho phép truy cập microphone
+・Xử lý trường hợp user từ chối quyền truy cập microphone
+3. Cập nhật giao diện hiển thị
+・Hiển thị thông báo trạng thái quyền truy cập microphone
+・Hiển thị message lỗi khi không thể sử dụng microphone
+・Hiển thị trạng thái bật/tắt microphone trên giao diện
+4. Đầu ra
+・Hệ thống xác định được trạng thái quyền truy cập microphone
+・Microphone được kích hoạt nếu quyền truy cập hợp lệ
+・Hiển thị message lỗi nếu không có quyền truy cập microphone
+・Cho phép sử dụng chức năng tắt tiếng hoàn toàn hoặc tắt mic bắt buộc khi microphone hoạt động hợp lệ."	4	100	"- Vấn đề: Ứng dụng nhận sai nguồn thu âm (nhận mic mặc định của laptop thay vì tai nghe người dùng vừa cắm vào).
+
+
+- Xử lý hiện tại: Đặt mặc định thiết bị thu âm theo cài đặt hệ thống của OS hiện tại.
+
+
+- Phòng ngừa: Cung cấp Menu thiết lập (Settings) bên trong app để người dùng chủ động chọn lại đầu vào/đầu ra âm thanh theo ý muốn."	
+9	"""完全消音・マイク強制ミュート機能 
+Chức năng tắt tiếng hoàn toàn/tắt micrô bắt buộc"""	"部屋に入ったときに自動的にミュートするように設定してください
+- Thiết lập chế độ auto mute khi vào room
+"	22h 27/5/2026	Trịnh Minh Đạt	"1. Xây dựng chức năng thiết lập auto mute khi vào room
+・Kiểm tra trạng thái cài đặt auto mute của user
+・Kích hoạt chế độ tự động tắt microphone khi user tham gia room
+2. Xử lý trạng thái khi user vào room
+・Tự động chuyển microphone sang trạng thái mute khi user vào room
+・Xử lý trường hợp không thể thay đổi trạng thái microphone
+3. Cập nhật giao diện hiển thị
+・Hiển thị trạng thái microphone đã được auto mute
+・Hiển thị thông báo khi chế độ auto mute được áp dụng
+・Hiển thị message lỗi nếu chức năng auto mute không hoạt động
+4. Đầu ra
+・User tham gia room với microphone ở trạng thái tắt tiếng mặc định
+・Hệ thống áp dụng chế độ auto mute thành công
+・Hiển thị trạng thái microphone chính xác trên giao diện."	3	100	"- Vấn đề: Người dùng không nhận thức được mình đang bị tắt mic mặc định khi vừa mở app, dẫn đến nói nhưng không ai nghe.
+
+
+- Xử lý hiện tại: Phát một âm thanh hệ thống (System beep) nhỏ kết hợp đổi màu icon mic sang màu đỏ nổi bật khi người dùng vừa tham gia phòng.
+
+
+- Phòng ngừa: Hiển thị popup nhắc nhở ""Mic của bạn đang tắt"" nếu hệ thống phát hiện cường độ âm thanh đầu vào lớn (có người đang nói) nhưng trạng thái là Mute."	
+10	"""完全消音・マイク強制ミュート機能 
+Chức năng tắt tiếng hoàn toàn/tắt micrô bắt buộc"""	"マイクの状態をリアルタイムで同期
+- Đồng bộ trạng thái mic realtime
+"	22h 31/5/2026	Trịnh Minh Đạt	"1. Xây dựng chức năng đồng bộ trạng thái microphone realtime
+・Theo dõi trạng thái bật/tắt microphone của user theo thời gian thực
+・Thiết lập cơ chế đồng bộ trạng thái microphone giữa các user trong room
+2. Xử lý thay đổi trạng thái microphone
+・Xử lý trường hợp user bật microphone
+・Xử lý trường hợp user tắt microphone
+・Cập nhật trạng thái microphone khi có thay đổi
+3. Cập nhật giao diện hiển thị
+・Hiển thị trạng thái microphone hiện tại của từng user trong room
+・Cập nhật giao diện realtime khi trạng thái microphone thay đổi
+・Hiển thị message lỗi nếu không thể đồng bộ trạng thái microphone
+4. Đầu ra
+・Trạng thái microphone được đồng bộ realtime giữa các user
+・Hệ thống hiển thị đúng trạng thái microphone của từng user
+・Đảm bảo các thay đổi microphone được cập nhật kịp thời trên giao diện."	5			
+11	"""完全消音・マイク強制ミュート機能 
+Chức năng tắt tiếng hoàn toàn/tắt micrô bắt buộc"""	"マイクの状態アイコンを表示する
+- Hiển thị icon trạng thái mic"	22h 28/5/2026	Trịnh Minh Đạt	"1. Xây dựng chức năng hiển thị icon trạng thái microphone
+・Thiết lập icon thể hiện trạng thái microphone trên giao diện
+・Liên kết trạng thái microphone với icon hiển thị tương ứng
+2. Xử lý thay đổi trạng thái microphone
+・Cập nhật icon khi user bật microphone
+・Cập nhật icon khi user tắt microphone
+・Xử lý trường hợp trạng thái microphone thay đổi realtime
+3. Cập nhật giao diện hiển thị
+・Hiển thị icon microphone đang bật
+・Hiển thị icon microphone đang tắt (mute)
+・Cập nhật icon trạng thái microphone theo thời gian thực
+4. Đầu ra
+・Hệ thống hiển thị chính xác trạng thái microphone của user
+・Icon microphone được cập nhật realtime khi trạng thái thay đổi
+・User có thể dễ dàng nhận biết trạng thái microphone hiện tại."	2	100	"- Vấn đề: Biểu tượng trạng thái quá nhỏ, khó nhận diện trong một cửa sổ ứng dụng chứa nhiều thông tin.
+
+
+- Xử lý hiện tại: Sử dụng màu sắc tương phản mạnh (Đỏ = Tắt, Xanh = Bật) để dễ phân biệt.
+
+
+- Phòng ngừa: Định hình lại một hệ thống thiết kế (Design System) chuẩn mực, tạo viền phát sáng quanh toàn bộ khung video khi người đó đang phát biểu."	
+12	"""クイック入室・ペアリング機能
+ Chức năng nhập nhanh/ghép nối"""	"素早くルームに参加できる画面デザイン
+- Thiết kế màn hình join room nhanh
+
+
+"	22h 23/5/2026	Đặng Huy Hoàng	"1. Xây dựng giao diện join room nhanh
+・Thiết kế màn hình cho phép user tham gia room nhanh chóng
+・Thiết lập khu vực nhập mã room hoặc thông tin tham gia room
+2. Xử lý thao tác tham gia room
+・Xử lý trường hợp user nhập thông tin room hợp lệ
+・Xử lý trường hợp thông tin room không hợp lệ hoặc room không tồn tại
+3. Cập nhật giao diện hiển thị
+・Hiển thị trạng thái tham gia room
+・Hiển thị thông báo lỗi khi không thể tham gia room
+・Hiển thị thông tin room sau khi user tham gia thành công
+4. Đầu ra
+・User có thể tham gia room nhanh chóng thông qua giao diện join room
+・Hệ thống xác nhận trạng thái tham gia room thành công hoặc thất bại
+・Hiển thị thông tin phù hợp sau khi hoàn tất thao tác join room."	4	100	"- Vấn đề: Việc mở lại app từ đầu rồi nhập mã phòng mất nhiều thao tác.
+
+
+- Xử lý hiện tại: Lưu trữ mã phòng của lần sử dụng gần nhất trên máy tính để tự động điền (auto-fill).
+
+
+- Phòng ngừa: Bố trí chức năng cho phép ứng dụng chạy ngầm ở Khay hệ thống (System Tray/Menu bar) và cung cấp tính năng ""Tham gia lại phòng gần nhất"" bằng cú click chuột phải."	
+13	"""クイック入室・ペアリング機能
+ Chức năng nhập nhanh/ghép nối"""	"ルームコード／ルームリンクを生成する
+- Tạo mã phòng / link phòng
+
+"	22h 25/5/2026	Phan Hồng Minh	"1. Xây dựng chức năng tạo mã phòng / link phòng
+・Thiết lập cơ chế tạo mã phòng hoặc đường dẫn phòng tự động
+・Đảm bảo mỗi phòng có mã hoặc link riêng biệt
+2. Xử lý thông tin phòng
+・Xử lý trường hợp tạo phòng thành công
+・Xử lý trường hợp lỗi khi tạo mã phòng hoặc link phòng
+・Kiểm tra tính hợp lệ của mã phòng hoặc link phòng được tạo
+3. Cập nhật giao diện hiển thị
+・Hiển thị mã phòng hoặc link phòng sau khi tạo thành công
+・Hiển thị thông báo tạo phòng thành công hoặc thất bại
+・Cung cấp chức năng sao chép mã phòng hoặc link phòng
+4. Đầu ra
+・Hệ thống tạo mã phòng hoặc link phòng thành công
+・User có thể sử dụng mã phòng hoặc link phòng để chia sẻ cho người khác tham gia
+・Hiển thị đầy đủ thông tin phòng sau khi tạo hoàn tất."	5	100	"- Vấn đề: Link chia sẻ thông thường (URL) mặc định sẽ mở ra trình duyệt web, không mở được ứng dụng Desktop.
+
+
+- Xử lý hiện tại: Yêu cầu người dùng chia sẻ Mã phòng ngắn (6 số) để copy và paste thủ công vào ứng dụng.
+
+
+- Phòng ngừa: Đề xuất khái niệm liên kết sâu để tự động khởi chạy desktop app khi click từ bất kỳ đâu."	
+14	"""クイック入室・ペアリング機能
+ Chức năng nhập nhanh/ghép nối"""	"ルームへの参加/退出をリアルタイムで処理する
+- Xử lý tham gia/rời phòng realtime"	22h 28/5/2026	Nguyễn Trọng Hinh	"1. Xây dựng chức năng xử lý tham gia/rời phòng realtime
+・Thiết lập cơ chế theo dõi trạng thái user tham gia hoặc rời phòng theo thời gian thực
+・Thiết lập cơ chế đồng bộ dữ liệu giữa các user trong room
+2. Xử lý trạng thái user trong phòng
+・Xử lý trường hợp user tham gia phòng thành công
+・Xử lý trường hợp user rời phòng
+・Cập nhật danh sách user khi có thay đổi trạng thái tham gia phòng
+3. Cập nhật giao diện hiển thị
+・Hiển thị danh sách user hiện đang có trong phòng
+・Cập nhật giao diện realtime khi có user tham gia hoặc rời phòng
+・Hiển thị thông báo khi trạng thái phòng thay đổi
+4. Đầu ra
+・Hệ thống đồng bộ trạng thái tham gia/rời phòng theo thời gian thực
+・Danh sách user trong phòng được cập nhật chính xác
+・User có thể theo dõi trạng thái thành viên trong phòng realtime."	5	100	"- Vấn đề: Ứng dụng bị buộc đóng tắt ngang (Force Quit / End Task) khiến tín hiệu rời phòng không được gửi đi.
+
+
+- Xử lý hiện tại: Phụ thuộc vào cơ chế tự động dọn dẹp (Cleanup job) của máy chủ nếu không thấy máy trạm gửi tín hiệu hoạt động (Ping/Pong).
+
+
+- Phòng ngừa: Áp dụng phương thức xử lý sự kiện ngắt kết nối trực tiếp tại cấp độ TCP/UDP Socket để máy chủ phản ứng ngay lập tức."	
+15	"""集中しやすい環境を作るためのBGM再生機能 
+Chức năng nhạc nền hỗ trợ tập trung"	"バックグラウンドミュージックプレーヤーを作成する
+- Xây dựng trình phát nhạc nền
+"	22h 26/5/2026	Nguyễn Trung Tường	"1. Xây dựng chức năng phát nhạc nền
+・Tích hợp audio player vào hệ thống
+・Phát nhạc nền đã được chọn
+・Hỗ trợ play/pause bài nhạc
+2. Xử lý trạng thái phát nhạc
+・Lưu và cập nhật trạng thái bài nhạc hiện tại
+・Xử lý chuyển trạng thái phát/tạm dừng
+3. Kết nối với giao diện
+・Liên kết audio player với giao diện chọn nhạc
+・Cập nhật trạng thái bài nhạc trên UI
+4. Đầu ra
+・User có thể phát và tạm dừng nhạc nền
+・Hệ thống phát đúng bài nhạc được chọn"	5	100	"- Vấn đề: Giới hạn về bản quyền đối với các bài nhạc được đính kèm sẵn vào gói cài đặt (Installer) của ứng dụng.
+
+
+- Xử lý hiện tại: MVP chỉ cung cấp một vài bản track lofi/không bản quyền (No-copyright) làm tính năng minh họa.
+
+
+- Phòng ngừa: Định hướng giải pháp tích hợp API kéo nhạc trực tiếp từ các nền tảng mở chuyên dụng để giảm dung lượng app cài đặt và tránh vấn đề pháp lý."	
+16	"""集中しやすい環境を作るためのBGM再生機能 
+Chức năng nhạc nền hỗ trợ tập trung"	"BGM制御機能を開発する
+- Xây dựng chức năng điều khiển nhạc nền
+"	22h 27/5/2026	Phan Hồng Minh	"1. Xây dựng chức năng điều khiển nhạc nền
+・Cho phép bật/tắt nhạc nền
+・Điều chỉnh âm lượng nhạc
+・Xử lý play/pause bài nhạc
+2. Xử lý trạng thái phát nhạc
+・Lưu trạng thái phát/tạm dừng của nhạc nền
+・Cập nhật trạng thái bài nhạc hiện tại
+3. Kết nối với giao diện
+・Liên kết chức năng điều khiển với giao diện nhạc nền
+・Cập nhật trạng thái điều khiển trên UI
+4.Đầu ra
+・User có thể bật/tắt và điều chỉnh âm lượng nhạc nền
+・Trạng thái phát nhạc được cập nhật chính xác trên giao diện"	4	100	"- Vấn đề: Việc tăng giảm âm lượng tổng của máy tính làm thay đổi đồng thời cả tiếng nhạc BGM lẫn tiếng của các thành viên khác.
+
+
+- Xử lý hiện tại: Cung cấp thanh trượt âm lượng nội bộ riêng biệt chỉ dành cho mô-đun phát nhạc nền bên trong ứng dụng.
+
+
+- Phòng ngừa: Đưa ra khái niệm ""Mixer âm thanh"", cho phép người dùng cân bằng độc lập tỷ lệ âm lượng giữa Mic, Nhạc và Giọng nói các thành viên."	
+17	"""学習内容やアイデアを記録できるメモ機能 
+Chức năng ghi chú """	"クイックノートのインターフェースデザイン
+- Thiết kế giao diện note nhanh
+
+"	22h 24/5/2026	Nguyễn Trọng Hinh	"1. Thiết kế giao diện memo
+・Thiết kế khu vực nhập nội dung ghi chú
+・Thiết kế danh sách/lịch sử memo
+・Thiết kế button tạo/sửa/xóa memo
+2. Thiết kế trạng thái giao diện
+・Hiển thị trạng thái lưu memo
+・Hiển thị nội dung memo hiện tại
+3. Responsive UI
+・Hỗ trợ hiển thị trên nhiều kích thước màn hình
+・Điều chỉnh layout phù hợp với giao diện học tập
+4. Đầu ra
+・Hoàn thành mockup/UI chức năng memo
+・Có thể tích hợp với chức năng lưu dữ liệu memo trong các task tiếp theo"	4	100	"- Vấn đề: Khung Note cố định chiếm diện tích, làm giảm không gian hiển thị màn hình camera của thành viên khác.
+
+
+- Xử lý hiện tại: Thiết kế giao diện Note dạng cửa sổ nổi (Floating Panel) nội bộ, có thể thu gọn hoặc kéo thả ở góc màn hình.
+
+
+- Phòng ngừa: Xây dựng tính năng ""Picture-in-Picture"" hoặc hỗ trợ mở Note thành một cửa sổ hệ điều hành độc lập (Multi-window) dành cho người dùng dùng hai màn hình."	
+18	"""学習内容やアイデアを記録できるメモ機能 
+Chức năng ghi chú """	"メモ管理機能を開発する
+-Xây dựng chức năng quản lý memo"	22h 31/5/2026	Đặng Huy Hoàng	"1. Xây dựng chức năng memo
+・Tạo/sửa/xóa/lưu ghi chú
+・Tự động lưu nội dung memo
+・Kết nối lưu trữ dữ liệu memo
+2. Cập nhật giao diện memo
+・Hiển thị nội dung memo hiện tại
+・Cập nhật trạng thái lưu dữ liệu
+3. Đầu ra
+・User có thể tạo và quản lý memo
+・Nội dung memo được tự động lưu trong quá trình sử dụng"	6			
+19	"""集中を妨げるアプリや通知を強制的にブロックする機能 
+Chức năng cưỡng chế khóa ứng dụng/thông báo"	"必要なOS権限の分析
+- Phân tích quyền hệ điều hành cần dùng"	22h 26/5/2026	Nguyễn Trung Tường	"1. Xây dựng chức năng phân tích quyền hệ điều hành
+・Xác định các quyền hệ điều hành cần thiết để thực hiện chức năng chặn ứng dụng/thông báo
+・Kiểm tra khả năng hỗ trợ quyền trên từng nền tảng hệ điều hành
+2. Xử lý trạng thái quyền truy cập
+・Xử lý trường hợp user cấp quyền hệ điều hành cần thiết
+・Xử lý trường hợp user từ chối cấp quyền
+・Kiểm tra tính hợp lệ của các quyền được cấp
+3. Cập nhật giao diện hiển thị
+・Hiển thị trạng thái quyền hệ điều hành hiện tại
+・Hiển thị hướng dẫn cấp quyền khi cần thiết
+・Hiển thị message lỗi nếu quyền chưa được cấp đầy đủ
+4. Đầu ra
+・Hệ thống xác định được các quyền hệ điều hành cần sử dụng
+・Đảm bảo đủ quyền để thực hiện chức năng khóa ứng dụng/thông báo
+・Thông báo rõ trạng thái quyền truy cập cho user."	3	100	"- Vấn đề: Can thiệp sâu để khóa ứng dụng khác hoặc chặn thông báo đòi hỏi quyền quản trị viên (Administrator / Root), dễ bị phần mềm diệt virus cảnh báo chặn.
+
+
+- Xử lý hiện tại: Định hình giải pháp khái niệm dựa trên sự tự nguyện của người dùng bằng cách nhắc họ tự bật chế độ Focus của OS thay vì app tự cưỡng chế chặn.
+
+
+- Phòng ngừa: Khảo sát khả năng sử dụng các bộ API chính thống của hệ điều hành để đồng bộ tính năng tập trung một cách an toàn."	
+20	"""集中を妨げるアプリや通知を強制的にブロックする機能 
+Chức năng cưỡng chế khóa ứng dụng/thông báo"	": 通知ブロック機能
+- Chức năng block notification"	22h 28/5/2026	Nguyễn Trung Tường	"1. Xây dựng chức năng chặn thông báo
+・Thiết lập cơ chế chặn thông báo trong thời gian tập trung
+・Xác định các loại thông báo cần được hạn chế hoặc chặn
+2. Xử lý trạng thái chặn thông báo
+・Kích hoạt chế độ chặn thông báo khi bắt đầu phiên tập trung
+・Tắt chế độ chặn thông báo khi kết thúc phiên tập trung
+・Xử lý trường hợp không thể áp dụng chức năng chặn thông báo
+3. Cập nhật giao diện hiển thị
+・Hiển thị trạng thái bật/tắt chức năng chặn thông báo
+・Hiển thị thông báo khi chế độ chặn thông báo được kích hoạt
+・Hiển thị message lỗi nếu chức năng không hoạt động đúng
+4. Đầu ra
+・Thông báo gây xao nhãng được hạn chế trong thời gian tập trung
+・Hệ thống quản lý trạng thái chặn thông báo theo thiết lập của user
+・User có thể theo dõi trạng thái hoạt động của chức năng block notification."	6	100	"- Vấn đề: Không thể tự ý tắt hiển thị các thông báo cấp cao của hệ thống (như báo pin yếu, lỗi mạng).
+
+
+- Xử lý hiện tại: Hiện thực hóa khái niệm bằng việc chặn các thông báo đẩy nội bộ trong ứng dụng học tập, và gợi ý người dùng bật tính năng Focus Assist / Do Not Disturb của Windows/macOS.
+
+
+- Phòng ngừa: Lên kế hoạch viết Script cấu hình để khi ứng dụng được bật, tự động gửi yêu cầu kích hoạt Focus Mode tới hệ điều hành thông qua API chuẩn."	
+21	"""集中を妨げるアプリや通知を強制的にブロックする機能 
+Chức năng cưỡng chế khóa ứng dụng/thông báo"	"アプリロック機能
+- Chức năng khóa ứng dụng"	22h 31/5/2026	Phan Hồng Minh	"1. Xây dựng chức năng khóa ứng dụng
+・Thiết lập cơ chế khóa các ứng dụng gây xao nhãng trong thời gian tập trung
+・Thiết lập danh sách ứng dụng cần khóa theo cấu hình của user
+2. Xử lý trạng thái khóa ứng dụng
+・Kích hoạt chế độ khóa ứng dụng khi bắt đầu phiên tập trung
+・Mở khóa ứng dụng khi kết thúc phiên tập trung
+・Xử lý trường hợp không thể áp dụng trạng thái khóa ứng dụng
+3. Cập nhật giao diện hiển thị
+・Hiển thị trạng thái ứng dụng đang bị khóa
+・Hiển thị thông báo khi chức năng khóa ứng dụng được kích hoạt
+・Hiển thị message lỗi nếu không thể thực hiện khóa ứng dụng
+4. Đầu ra
+・Các ứng dụng gây xao nhãng bị hạn chế sử dụng trong thời gian tập trung
+・Hệ thống duy trì trạng thái khóa theo thiết lập của user
+・User có thể theo dõi trạng thái hoạt động của chức năng khóa ứng dụng."	5			
+22	"""集中を妨げるアプリや通知を強制的にブロックする機能 
+Chức năng cưỡng chế khóa ứng dụng/thông báo"	"集中セッションの時間設定
+- Thiết lập thời gian focus session"	22h 26/5/2026	Phan Hồng Minh	"1. Xây dựng chức năng thiết lập thời gian focus session
+・Cho phép user thiết lập thời lượng của phiên tập trung
+・Thiết lập thời gian bắt đầu và thời gian kết thúc phiên tập trung
+2. Xử lý dữ liệu thời gian focus session
+・Xử lý trường hợp user thiết lập thời gian hợp lệ
+・Xử lý trường hợp dữ liệu thời gian không hợp lệ
+・Lưu cấu hình thời gian focus session của user
+3. Cập nhật giao diện hiển thị
+・Hiển thị thời lượng focus session đã thiết lập
+・Hiển thị trạng thái thời gian còn lại trong phiên tập trung
+・Hiển thị message lỗi khi thiết lập thời gian không hợp lệ
+4. Đầu ra
+・Hệ thống lưu và áp dụng thời gian focus session theo thiết lập của user
+・Phiên tập trung được thực hiện theo thời lượng đã cấu hình
+・User có thể theo dõi trạng thái thời gian của focus session."	4	100	"- Vấn đề: Người dùng tắt hẳn máy tính trong thời gian nghỉ, khi mở lại app không giữ được chuỗi thời gian đếm ngược.
+
+
+- Xử lý hiện tại: Lưu Timestamp (mốc thời gian bắt đầu và kết thúc) vào file local; khi mở lại app tự động đối chiếu thời gian hiện tại để tính toán tiếp.
+
+
+- Phòng ngừa: Chạy một Service ngầm cấp hệ điều hành khởi động cùng Windows (Startup app) để duy trì lịch trình phiên tập trung."	
+23	"""集中を妨げるアプリや通知を強制的にブロックする機能 
+Chức năng cưỡng chế khóa ứng dụng/thông báo"	" 集中状態のモニタリング
+Theo dõi trạng thái tập trung"	22h 29/5/2026	Nguyễn Trọng Hinh	"1. Xây dựng chức năng theo dõi trạng thái tập trung
+・Thiết lập cơ chế theo dõi trạng thái tập trung của user trong focus session
+・Thu thập dữ liệu liên quan đến quá trình tập trung của user
+2. Xử lý dữ liệu trạng thái tập trung
+・Xử lý trường hợp user duy trì trạng thái tập trung
+・Xử lý trường hợp user rời khỏi trạng thái tập trung hoặc bị gián đoạn
+・Cập nhật trạng thái tập trung theo thời gian thực
+3. Cập nhật giao diện hiển thị
+・Hiển thị trạng thái tập trung hiện tại của user
+・Hiển thị thông tin theo dõi trong suốt focus session
+・Hiển thị cảnh báo hoặc thông báo khi trạng thái tập trung thay đổi
+4. Đầu ra
+・Hệ thống theo dõi được trạng thái tập trung của user trong phiên làm việc
+・Dữ liệu trạng thái tập trung được cập nhật liên tục
+・User có thể theo dõi và kiểm soát mức độ tập trung của bản thân."	4			
+24	"""集中を妨げるアプリや通知を強制的にブロックする機能 
+Chức năng cưỡng chế khóa ứng dụng/thông báo"	"学習アプリケーション終了時のアラート表示
+- Hiển thị cảnh báo khi thoát ứng dụng học"	22h 1/6/2026	Đặng Huy Hoàng	"1. Xây dựng chức năng phát hiện thoát ứng dụng học
+・Thiết lập cơ chế phát hiện khi user rời khỏi ứng dụng học trong focus session
+・Theo dõi trạng thái hoạt động của ứng dụng học trong thời gian tập trung
+2. Xử lý trạng thái thoát ứng dụng
+・Xử lý trường hợp user chuyển sang ứng dụng khác
+・Xử lý trường hợp user đóng hoặc thoát ứng dụng học
+・Ghi nhận trạng thái gián đoạn trong phiên tập trung
+3. Cập nhật giao diện hiển thị
+・Hiển thị cảnh báo khi user thoát khỏi ứng dụng học
+・Hiển thị thông báo nhắc user quay lại phiên tập trung
+・Cập nhật trạng thái tập trung trên giao diện
+4. Đầu ra
+・Hệ thống phát hiện được khi user thoát ứng dụng học
+・User nhận được cảnh báo khi rời khỏi môi trường học tập
+・Hỗ trợ duy trì trạng thái tập trung trong focus session."	4			

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StudyBuddy - Môi trường học tập hiệu quả với phòng học video, ghi chú, và chế độ tập trung">
+    <title>StudyBuddy - Môi trường học tập hiệu quả</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/room.css">
+    <link rel="stylesheet" href="css/memo.css">
+    <link rel="stylesheet" href="css/focus.css">
+    <link rel="stylesheet" href="css/bgm.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <!-- Phase 4: Focus Dashboard CSS -->
+    <link rel="stylesheet" href="css/focus-dashboard.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav id="main-nav">
+        <div class="nav-brand">
+            <span class="brand-icon">📚</span>
+            <span class="brand-text">StudyBuddy</span>
+        </div>
+        <div class="nav-tabs">
+            <button id="nav-tab-peer" class="nav-tab active" onclick="switchPage('peer')">
+                <span class="tab-icon">👥</span>
+                <span>Phòng học</span>
+            </button>
+            <button id="nav-tab-memo" class="nav-tab" onclick="switchPage('memo')">
+                <span class="tab-icon">📝</span>
+                <span>Ghi chú</span>
+            </button>
+            <button id="nav-tab-focus" class="nav-tab" onclick="switchPage('focus')">
+                <span class="tab-icon">🎯</span>
+                <span>Tập trung</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- SECTION 1: PHÒNG HỌC (Peer Pressure)      -->
+    <!-- ========================================== -->
+    <div id="peer-section" class="solution-section active">
+
+        <!-- Screen 1: Home -->
+        <div id="peer-home" class="screen active">
+            <div class="hero-container">
+                <div class="hero-glow"></div>
+                <div class="hero-content">
+                    <div class="hero-badge">✨ Học cùng bạn bè</div>
+                    <h1>Môi trường tự học Online</h1>
+                    <p class="hero-subtitle">Cùng học, cùng tiến bộ. Tạo áp lực tích cực từ bạn bè để duy trì sự tập trung.</p>
+
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="online-count">12</span>
+                            <span class="stat-label">Đang online</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="room-count">0</span>
+                            <span class="stat-label">Phòng học</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-number">89%</span>
+                            <span class="stat-label">Hoàn thành</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button id="btn-create-room" class="btn btn-primary btn-lg" onclick="HomePage.showCreateRoom()">
+                            <span class="btn-icon">➕</span>
+                            Tạo phòng học
+                        </button>
+                        <button id="btn-join-code" class="btn btn-secondary btn-lg" onclick="HomePage.showJoinRoom()">
+                            <span class="btn-icon">🔑</span>
+                            Nhập mã phòng
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Floating avatars decoration -->
+                <div class="floating-avatars">
+                    <div class="float-avatar" style="--delay: 0s; --x: 10%; --y: 20%;">👨‍💻</div>
+                    <div class="float-avatar" style="--delay: 1s; --x: 85%; --y: 15%;">👩‍💻</div>
+                    <div class="float-avatar" style="--delay: 2s; --x: 75%; --y: 70%;">📖</div>
+                    <div class="float-avatar" style="--delay: 0.5s; --x: 15%; --y: 75%;">🎯</div>
+                    <div class="float-avatar" style="--delay: 1.5s; --x: 50%; --y: 85%;">💡</div>
+                </div>
+            </div>
+
+            <!-- Room list -->
+            <div class="room-list-section">
+                <h2 class="section-title">Phòng học đang hoạt động</h2>
+                <div class="room-cards" id="room-cards-container">
+                    <!-- Rooms rendered by home.js -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Room Modal -->
+        <div id="create-room-modal" class="modal-overlay" onclick="closeModal(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <button class="modal-close" onclick="HomePage.hideCreateRoom()">✕</button>
+                <h2>🏠 Tạo phòng học mới</h2>
+                <div class="form-group">
+                    <label for="room-name">Tên phòng</label>
+                    <input type="text" id="room-name" placeholder="VD: Nhóm ITSS - Code đồ án">
+                </div>
+                <div class="form-group">
+                    <label for="room-desc">Mô tả (tuỳ chọn)</label>
+                    <input type="text" id="room-desc" placeholder="VD: Cùng nhau hoàn thành task tuần này">
+                </div>
+                <div class="form-group">
+                    <label>Chế độ phòng</label>
+                    <div class="radio-group">
+                        <label class="radio-option active">
+                            <input type="radio" name="room-mode" value="public" checked>
+                            <span class="radio-icon">🌍</span>
+                            <span>Công khai</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="room-mode" value="private">
+                            <span class="radio-icon">🔒</span>
+                            <span>Riêng tư</span>
+                        </label>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block" onclick="HomePage.createAndJoin()">
+                    Tạo và vào phòng →
+                </button>
+            </div>
+        </div>
+
+        <!-- Join by Code Modal -->
+        <div id="join-room-modal" class="modal-overlay" onclick="closeModal(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <button class="modal-close" onclick="document.getElementById('join-room-modal').classList.remove('show')">✕</button>
+                <h2>🔑 Tham gia phòng</h2>
+                <div class="form-group">
+                    <label for="join-room-code">Nhập mã phòng</label>
+                    <input type="text" id="join-room-code" placeholder="VD: ABC123" style="text-transform: uppercase; letter-spacing: 3px; font-size: 18px; text-align: center;">
+                </div>
+                <button class="btn btn-primary btn-block" onclick="HomePage.joinByCode(); document.getElementById('join-room-modal').classList.remove('show')">
+                    Tham gia →
+                </button>
+            </div>
+        </div>
+
+        <!-- Screen 2: In Room -->
+        <div id="peer-room" class="screen">
+            <div class="room-header">
+                <div class="room-header-left">
+                    <button class="btn-icon-only" onclick="RoomPage.leaveRoom()">←</button>
+                    <div class="room-info">
+                        <h2 id="room-title">🖥️ Phòng học</h2>
+                        <span class="room-timer" id="room-timer">⏱️ 00:00:00</span>
+                    </div>
+                </div>
+                <div class="room-header-right">
+                    <div class="room-code-display">
+                        <code id="room-code-value">ABC123</code>
+                        <button class="copy-btn" onclick="RoomPage.copyRoomCode()" title="Copy mã phòng">📋</button>
+                    </div>
+                    <button class="btn btn-danger-outline" onclick="RoomPage.leaveRoom()">
+                        Rời phòng
+                    </button>
+                </div>
+            </div>
+
+            <div class="room-body">
+                <!-- Members Grid -->
+                <div class="members-grid" id="members-grid">
+                    <!-- Members rendered by room.js -->
+                </div>
+
+                <!-- Chat sidebar -->
+                <div class="chat-sidebar">
+                    <h3>💬 Tin nhắn nhóm</h3>
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-msg system">Phòng học đã bắt đầu!</div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Nhắn tin..." onkeydown="if(event.key==='Enter')RoomPage.sendChat()">
+                        <button class="btn btn-primary btn-sm" onclick="RoomPage.sendChat()">Gửi</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Picker -->
+            <div id="status-picker" class="status-picker hidden">
+                <div class="status-picker-content">
+                    <h3>Chọn trạng thái của bạn</h3>
+                    <div class="status-options">
+                        <button class="status-option" onclick="RoomPage.setStatus('🖥️ Đang code')">🖥️ Đang code</button>
+                        <button class="status-option" onclick="RoomPage.setStatus('📖 Đọc tài liệu')">📖 Đọc tài liệu</button>
+                        <button class="status-option" onclick="RoomPage.setStatus('🔥 Tập trung cao độ')">🔥 Tập trung cao độ</button>
+                        <button class="status-option" onclick="RoomPage.setStatus('✍️ Viết báo cáo')">✍️ Viết báo cáo</button>
+                        <button class="status-option" onclick="RoomPage.setStatus('☕ Nghỉ giải lao')">☕ Nghỉ giải lao</button>
+                        <button class="status-option" onclick="RoomPage.setStatus('🤔 Đang suy nghĩ')">🤔 Đang suy nghĩ</button>
+                        <button class="status-option" onclick="RoomPage.setStatus('🎨 Thiết kế UI')">🎨 Thiết kế UI</button>
+                        <button class="status-option" onclick="RoomPage.setStatus('🐛 Debug')">🐛 Debug</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="memo-section" class="solution-section">
+        <div class="memo-page-container">
+            <div class="memo-page-header">
+                <h1>📝 Ghi chú</h1>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="if(window.electronAPI) window.electronAPI.openMemoWindow(); else alert('Tính năng này chỉ có trên Desktop App')" title="Mở cửa sổ rời">
+                        <span class="btn-icon">🪟</span>
+                        Cửa sổ rời
+                    </button>
+                    <button class="btn btn-primary" onclick="MemoPage.createMemo()">
+                        <span class="btn-icon">➕</span>
+                        Tạo ghi chú mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Memo Editor -->
+            <div class="memo-editor" id="memo-editor" style="display: none;">
+                <input type="text" id="memo-title" placeholder="Tiêu đề ghi chú...">
+                <textarea id="memo-content" placeholder="Nội dung ghi chú...&#10;&#10;Hỗ trợ ghi chú tự do. Nội dung sẽ được tự động lưu."></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+                    <span class="memo-word-count" id="memo-word-count" style="font-size: 12px; color: var(--text-muted);">0 từ · 0 ký tự</span>
+                    <span class="memo-save-status" id="memo-save-status"></span>
+                </div>
+            </div>
+
+            <!-- Memo List -->
+            <div class="memo-list-header">
+                <h2>📋 Danh sách ghi chú</h2>
+                <span class="memo-count" id="memo-count">0 ghi chú</span>
+            </div>
+            <!-- Phase 3: Memo Search -->
+            <div style="padding: 0 0 12px;">
+                <input type="text" id="memo-search" placeholder="🔍 Tìm kiếm ghi chú..." style="width: 100%; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: inherit; font-size: 13px;">
+            </div>
+            <div class="memo-list" id="memo-list">
+                <!-- Memos rendered by memo.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 3: TẬP TRUNG (Focus Mode)          -->
+    <!-- ========================================== -->
+    <div id="focus-section" class="solution-section">
+
+        <!-- Screen 1: Study -->
+        <div id="focus-study" class="screen active">
+            <div class="focus-container">
+                <div class="focus-hero">
+                    <div class="hero-badge">🎯 Chế độ tập trung</div>
+                    <h1>Focus Mode</h1>
+                    <p class="hero-subtitle">Đặt timer, ghi lại xao nhãng, giữ vững sự tập trung. Chỉ "trả nợ" sau khi hết giờ.</p>
+                    <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: center; align-items: center;">
+                        <button class="btn btn-sm btn-secondary" onclick="if(window.electronAPI) window.electronAPI.openSettings('focus'); else alert('Tính năng này chỉ có trên Desktop App')">
+                            ⚙️ Mở Focus Assist (OS)
+                        </button>
+                        <!-- Phase 4: Notification Block Toggle (Task 20) -->
+                        <label style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 5px;" title="Chặn các thông báo nội bộ của ứng dụng khi đang học">
+                            <input type="checkbox" id="focus-block-toggle" onchange="setFocusBlockMode(this.checked)">
+                            🔕 Chặn thông báo
+                        </label>
+                        <label style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="startup-toggle" onchange="if(window.electronAPI) window.electronAPI.toggleStartup(this.checked)">
+                            Khởi động cùng Windows
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Timer display -->
+                <div class="memo-timer-display">
+                    <div class="timer-ring">
+                        <svg viewBox="0 0 200 200">
+                            <circle cx="100" cy="100" r="90" class="timer-ring-bg"/>
+                            <circle cx="100" cy="100" r="90" class="timer-ring-progress" id="timer-ring-progress"/>
+                        </svg>
+                        <div class="timer-text">
+                            <span class="timer-value" id="focus-timer-value">25:00</span>
+                            <span class="timer-label" id="focus-timer-label">Chưa bắt đầu</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer controls -->
+                <div class="timer-controls" id="timer-controls-start">
+                    <div class="timer-presets" style="display: flex; gap: 10px; align-items: center;">
+                        <button class="preset-btn active" onclick="FocusPage.setPreset(25, this)">25 phút</button>
+                        <button class="preset-btn" onclick="FocusPage.setPreset(45, this)">45 phút</button>
+                        <button class="preset-btn" onclick="FocusPage.setPreset(60, this)">60 phút</button>
+                        <div class="custom-time-input" style="display: flex; align-items: center; gap: 5px; background: var(--bg-card); padding: 4px; border-radius: 20px; border: 1px solid var(--border);">
+                            <input type="number" id="custom-time" placeholder="Phút" min="1" max="180" style="width: 60px; border: none; background: transparent; color: var(--text-primary); text-align: center; font-size: 14px;" onchange="FocusPage.setCustomPreset(this.value, this)">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-lg" onclick="FocusPage.startSession(); FocusPage.requestNotificationPermission()">
+                        ▶️ Bắt đầu phiên học
+                    </button>
+                </div>
+
+                <!-- Distraction input -->
+                <div class="distraction-input-area hidden" id="distraction-area">
+                    <div class="distraction-prompt">
+                        <div class="prompt-icon">💭</div>
+                        <h3>Bị xao nhãng? Ghi lại ở đây!</h3>
+                        <p>Viết ra rồi quên đi. Bạn sẽ xử lý sau khi hết giờ.</p>
+                    </div>
+                    <div class="distraction-form">
+                        <input type="text" id="distraction-input" placeholder='VD: "Check tin nhắn lớp", "Xem story Instagram"...' onkeydown="if(event.key==='Enter')FocusPage.saveDistraction()">
+                        <button class="btn btn-primary" onclick="FocusPage.saveDistraction()">
+                            📥 Lưu vào kho
+                        </button>
+                    </div>
+
+                    <div class="saved-indicator" id="saved-indicator">
+                        <div class="vault-icon">🔒</div>
+                        <span>Đã lưu <strong id="distraction-count">0</strong> suy nghĩ xao nhãng</span>
+                        <div class="vault-hint">Sẽ mở khóa khi hết giờ học</div>
+                    </div>
+
+                    <!-- Focus stats during session -->
+                    <div class="focus-stats-bar" id="focus-stats-bar" style="display: none;">
+                        <div class="focus-stat-item">
+                            <span class="stat-value" id="focus-tab-leave-count">0</span>
+                            <span class="stat-label">Lần rời tab</span>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-danger-outline btn-lg" onclick="FocusPage.endSession()" style="margin-top: 24px;">
+                        ⏹️ Kết thúc phiên học
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Review -->
+        <div id="focus-review" class="screen">
+            <div class="review-container">
+                <div class="review-celebration">🎉</div>
+                <h1>Phiên học kết thúc!</h1>
+                <p class="review-subtitle">Đây là danh sách những suy nghĩ xao nhãng của bạn. Bây giờ bạn có thể "trả nợ"!</p>
+
+                <div class="review-stats">
+                    <div class="review-stat">
+                        <span class="review-stat-icon">⏱️</span>
+                        <span class="review-stat-value" id="review-time">25:00</span>
+                        <span class="review-stat-label">Thời gian học</span>
+                    </div>
+                    <div class="review-stat">
+                        <span class="review-stat-icon">💭</span>
+                        <span class="review-stat-value" id="review-count">0</span>
+                        <span class="review-stat-label">Lần xao nhãng</span>
+                    </div>
+                    <div class="review-stat">
+                        <span class="review-stat-icon">🏆</span>
+                        <span class="review-stat-value" id="review-score">A+</span>
+                        <span class="review-stat-label">Đánh giá</span>
+                    </div>
+                </div>
+
+                <div class="review-list-section">
+                    <h2>📋 Danh sách "nợ" cần trả</h2>
+                    <div class="review-list" id="review-list">
+                        <!-- Items rendered by focus.js -->
+                    </div>
+                </div>
+
+                <div class="review-actions">
+                    <button class="btn btn-primary btn-lg" onclick="FocusPage.resetSession()">
+                        🔄 Bắt đầu phiên mới
+                    </button>
+                </div>
+
+                <!-- Phase 4: Focus Dashboard -->
+                <div class="focus-dashboard-section" style="margin-top: 40px; padding-top: 30px; border-top: 1px solid var(--border);">
+                    <h2>📊 Bảng thống kê tập trung</h2>
+                    <div id="focus-dashboard-content">
+                        <!-- Dashboard rendered by focus-dashboard.js -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BGM PLAYER WIDGET ===== -->
+    <div class="bgm-widget">
+        <button id="bgm-toggle-btn" class="bgm-toggle-btn" onclick="toggleBGMPanel()" title="Nhạc nền">
+            🎵
+        </button>
+        <div class="bgm-panel" id="bgm-panel">
+            <h3>🎵 Nhạc nền tập trung</h3>
+            <div id="bgm-now-playing" class="bgm-now-playing" style="display: none;"></div>
+            <div class="bgm-track-list">
+                <div class="bgm-track" data-track-id="1" onclick="BGMPlayer.play(1)">
+                    <span class="bgm-track-icon">🎵</span>
+                    <span class="bgm-track-name">Lo-fi Chill</span>
+                    <span class="bgm-track-duration">∞</span>
+                </div>
+                <div class="bgm-track" data-track-id="2" onclick="BGMPlayer.play(2)">
+                    <span class="bgm-track-icon">🌧️</span>
+                    <span class="bgm-track-name">Mưa nhẹ</span>
+                    <span class="bgm-track-duration">∞</span>
+                </div>
+                <div class="bgm-track" data-track-id="3" onclick="BGMPlayer.play(3)">
+                    <span class="bgm-track-icon">🌊</span>
+                    <span class="bgm-track-name">Tiếng sóng biển</span>
+                    <span class="bgm-track-duration">∞</span>
+                </div>
+                <div class="bgm-track" data-track-id="4" onclick="BGMPlayer.play(4)">
+                    <span class="bgm-track-icon">🌲</span>
+                    <span class="bgm-track-name">Rừng & Chim hót</span>
+                    <span class="bgm-track-duration">∞</span>
+                </div>
+                <div class="bgm-track" data-track-id="5" onclick="BGMPlayer.play(5)">
+                    <span class="bgm-track-icon">🎹</span>
+                    <span class="bgm-track-name">Piano nhẹ nhàng</span>
+                    <span class="bgm-track-duration">∞</span>
+                </div>
+                <div class="bgm-track" data-track-id="6" onclick="BGMPlayer.play(6)">
+                    <span class="bgm-track-icon">☕</span>
+                    <span class="bgm-track-name">Quán cà phê</span>
+                    <span class="bgm-track-duration">∞</span>
+                </div>
+            </div>
+            <div class="bgm-volume-control">
+                <label>🎵 Nhạc</label>
+                <input type="range" id="bgm-volume-slider" class="bgm-volume-slider" min="0" max="100" value="50" oninput="BGMPlayer.setVolume(this.value)">
+                <span id="bgm-volume-value" class="bgm-volume-value">50%</span>
+            </div>
+            <div class="bgm-volume-control" style="margin-top: 10px;">
+                <label>🗣️ Giọng</label>
+                <input type="range" id="voice-volume-slider" class="bgm-volume-slider" min="0" max="100" value="80" oninput="RoomPage.setVoiceVolume(this.value)">
+                <span id="voice-volume-value" class="bgm-volume-value">80%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== WELCOME MODAL ===== -->
+    <div id="welcome-modal" class="modal-overlay">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2>👋 Chào mừng đến StudyBuddy!</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">Cho mình biết tên bạn để bắt đầu nhé</p>
+            <div class="form-group">
+                <label for="welcome-name">Tên của bạn</label>
+                <input type="text" id="welcome-name" placeholder="VD: Nguyễn Văn A" autofocus>
+            </div>
+            <div class="form-group">
+                <label>Chọn avatar</label>
+                <div class="welcome-avatar-picker" id="avatar-picker">
+                    <!-- Rendered by app.js -->
+                </div>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="saveUserIdentity()">
+                Bắt đầu học →
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div id="toast" class="toast">
+        <span id="toast-msg"></span>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <!-- Socket.io client (served by server) -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Utilities -->
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/utils/toast.js"></script>
+    <script src="js/utils/storage.js"></script>
+
+    <!-- Services -->
+    <script src="js/services/socket-client.js"></script>
+    <script src="js/services/media.js"></script>
+    <script src="js/services/webrtc.js"></script>
+    <script src="js/services/bgm-player.js"></script>
+
+    <!-- Pages -->
+    <script src="js/pages/home.js"></script>
+    <script src="js/pages/room.js"></script>
+    <script src="js/pages/memo.js"></script>
+    <script src="js/pages/focus.js"></script>
+    <!-- Phase 4: Focus Dashboard -->
+    <script src="js/pages/focus-dashboard.js"></script>
+
+    <!-- Main App -->
+    <script src="js/app.js"></script>
+</body>
+</html>

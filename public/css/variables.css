@@ -1,0 +1,36 @@
+/* ===== DESIGN TOKENS ===== */
+:root {
+    /* Backgrounds */
+    --bg-primary: #0a0a1a;
+    --bg-secondary: #12122a;
+    --bg-card: rgba(255,255,255,0.04);
+    --bg-card-hover: rgba(255,255,255,0.08);
+    --bg-glass: rgba(255,255,255,0.06);
+
+    /* Borders */
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(255,255,255,0.15);
+
+    /* Text */
+    --text-primary: #f0f0f5;
+    --text-secondary: #8888aa;
+    --text-muted: #555577;
+
+    /* Accent colors */
+    --accent: #6C5CE7;
+    --accent-light: #a29bfe;
+    --accent-glow: rgba(108,92,231,0.3);
+
+    /* Semantic colors */
+    --green: #00B894;
+    --green-glow: rgba(0,184,148,0.3);
+    --red: #E17055;
+    --yellow: #FDCB6E;
+
+    /* Radius */
+    --radius: 16px;
+    --radius-sm: 10px;
+
+    /* Transitions */
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

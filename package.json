@@ -1,0 +1,20 @@
+{
+  "name": "studybuddy",
+  "version": "1.0.0",
+  "description": "StudyBuddy - Môi trường học tập hiệu quả với video room, memo, focus mode",
+  "main": "main.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "electron .",
+    "desktop": "electron ."
+  },
+  "keywords": ["study", "focus", "video", "webrtc", "pomodoro", "electron", "desktop"],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.0",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0"
+  }
+}
