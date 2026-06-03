@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     minimizeWindow: () => ipcRenderer.send('window-minimize'),
     maximizeWindow: () => ipcRenderer.send('window-maximize'),
     closeWindow: () => ipcRenderer.send('window-close'),
+    quitApp: () => ipcRenderer.send('app-quit'),
 
     // OS-level features
     openSettings: (settingType) => ipcRenderer.send('open-settings', settingType),
@@ -21,6 +22,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     // Task 24: Set focus mode
     setFocusMode: (active) => ipcRenderer.send('set-focus-mode', active),
+
+    // Fullscreen lock mode (SEB-like best effort)
+    enterLockMode: () => ipcRenderer.invoke('enter-lock-mode'),
+    exitLockMode: () => ipcRenderer.invoke('exit-lock-mode'),
+    onLockModeChanged: (callback) => ipcRenderer.on('lock-mode-changed', (event, active) => callback(active)),
+    onLockEscapeAttempt: (callback) => ipcRenderer.on('lock-escape-attempt', (event, action) => callback(action)),
     
     // Task 21: App monitoring
     startAppMonitoring: () => ipcRenderer.send('start-app-monitoring'),

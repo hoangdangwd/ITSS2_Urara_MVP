@@ -6,6 +6,170 @@
 // ===== CURRENT STATE =====
 let currentPage = 'peer'; // 'peer' | 'memo' | 'focus'
 
+// ===== SEB-LIKE LOCK MODE =====
+const LockMode = {
+    enabled: false,
+    listenersAttached: false,
+
+    isPeerHomeActive() {
+        const peerSection = document.getElementById('peer-section');
+        const peerHome = document.getElementById('peer-home');
+        const peerRoom = document.getElementById('peer-room');
+        return Boolean(
+            peerSection && peerSection.classList.contains('active') &&
+            peerHome && peerHome.classList.contains('active') &&
+            peerRoom && !peerRoom.classList.contains('active')
+        );
+    },
+
+    updateExitButtonVisibility() {
+        const btn = document.getElementById('btn-exit-lock-mode');
+        if (!btn) return;
+        btn.style.display = this.enabled && this.isPeerHomeActive() ? '' : 'none';
+    },
+
+    handleKeydown(event) {
+        if (!LockMode.enabled) return;
+        const key = (event.key || '').toLowerCase();
+        const blocked =
+            key === 'f11' ||
+            (event.ctrlKey && key === 'tab') ||
+            (event.ctrlKey && key === 'w') ||
+            (event.altKey && key === 'f4');
+
+        if (!blocked) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        showToast('🔒 Chế độ khóa đang bật. Không thể rời phiên bằng phím tắt này.', 2500, true);
+    },
+
+    async handleFullscreenChange() {
+        if (!LockMode.enabled) return;
+        if (window.electronAPI) return;
+
+        if (!document.fullscreenElement) {
+            showToast('🔒 Đang yêu cầu quay lại toàn màn hình...', 2500, true);
+            try {
+                await document.documentElement.requestFullscreen();
+            } catch (err) {
+                showToast('⚠️ Trình duyệt từ chối tự vào lại toàn màn hình. Hãy bật lại thủ công.', 3500, true);
+            }
+        }
+    },
+
+    attachListeners() {
+        if (this.listenersAttached) return;
+
+        this._keydownHandler = this.handleKeydown.bind(this);
+        this._fullscreenChangeHandler = this.handleFullscreenChange.bind(this);
+
+        document.addEventListener('keydown', this._keydownHandler, true);
+        document.addEventListener('fullscreenchange', this._fullscreenChangeHandler);
+        this.listenersAttached = true;
+    },
+
+    detachListeners() {
+        if (!this.listenersAttached) return;
+
+        document.removeEventListener('keydown', this._keydownHandler, true);
+        document.removeEventListener('fullscreenchange', this._fullscreenChangeHandler);
+        this.listenersAttached = false;
+    },
+
+    async enter() {
+        let entered = false;
+
+        if (window.electronAPI && window.electronAPI.enterLockMode) {
+            entered = await window.electronAPI.enterLockMode();
+        } else if (document.documentElement.requestFullscreen) {
+            try {
+                await document.documentElement.requestFullscreen();
+                entered = true;
+            } catch (err) {
+                entered = false;
+            }
+        }
+
+        if (!entered) {
+            showToast('⚠️ Không thể bật toàn màn hình trên thiết bị hiện tại.', 3500, true);
+            return false;
+        }
+
+        this.enabled = true;
+        this.attachListeners();
+        this.updateExitButtonVisibility();
+
+        if (!window.electronAPI) {
+            showToast('ℹ️ Chế độ web chỉ chặn best-effort, không chặn tuyệt đối Alt+Tab/Win key.', 4000, true);
+        }
+
+        return true;
+    },
+
+    async exit() {
+        if (!this.enabled) return;
+
+        if (!this.isPeerHomeActive()) {
+            showToast('⚠️ Bạn phải rời room và quay về Home trước khi thoát chế độ toàn màn hình.', 3000, true);
+            return;
+        }
+
+        if (window.electronAPI && window.electronAPI.exitLockMode) {
+            await window.electronAPI.exitLockMode();
+        } else if (document.fullscreenElement && document.exitFullscreen) {
+            try {
+                await document.exitFullscreen();
+            } catch (err) {
+                // Browser may deny exit without trusted gesture; the same click is a trusted gesture.
+            }
+        }
+
+        this.enabled = false;
+        this.detachListeners();
+        this.updateExitButtonVisibility();
+        showToast('✅ Đã thoát chế độ toàn màn hình.', 2000);
+    },
+
+    bindElectronEvents() {
+        if (!window.electronAPI) return;
+
+        if (window.electronAPI.onLockModeChanged) {
+            window.electronAPI.onLockModeChanged((active) => {
+                this.enabled = Boolean(active);
+                if (this.enabled) this.attachListeners();
+                else this.detachListeners();
+                this.updateExitButtonVisibility();
+            });
+        }
+
+        if (window.electronAPI.onLockEscapeAttempt) {
+            window.electronAPI.onLockEscapeAttempt((action) => {
+                showToast('🔒 Thao tác bị chặn: ' + action, 2000, true);
+            });
+        }
+    },
+
+    async startupPrompt() {
+        const accepted = window.confirm(
+            'Chế độ giám sát đang bật. Bạn có muốn mở chế độ toàn màn hình ngay bây giờ không?\n\n' +
+            '- Không cho phép thoát bằng F11/Ctrl+Tab\n' +
+            '- Muốn thoát phải quay về Home và dùng nút thoát'
+        );
+
+        if (!accepted) return;
+        await this.enter();
+    }
+};
+
+async function requestExitLockMode() {
+    await LockMode.exit();
+
+    if (window.electronAPI?.quitApp) {
+        window.electronAPI.quitApp();
+    }
+}
+
 // ===== NAVIGATION =====
 function switchPage(page) {
     currentPage = page;
@@ -24,6 +188,8 @@ function switchPage(page) {
     if (page === 'memo') MemoPage.init();
     if (page === 'focus') FocusPage.init();
     if (page === 'peer') HomePage.init();
+
+    LockMode.updateExitButtonVisibility();
 }
 
 // ===== WELCOME MODAL (User Identity) =====
@@ -106,6 +272,9 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📚 StudyBuddy Web App starting...');
 
+    LockMode.bindElectronEvents();
+    LockMode.startupPrompt();
+
     // 1. Check user identity
     const user = UserStorage.getUser();
     if (!user) {
@@ -133,4 +302,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     console.log('📚 StudyBuddy ready!');
+
+    // Keep button state in sync because peer room/home is toggled directly by RoomPage.
+    setInterval(() => {
+        LockMode.updateExitButtonVisibility();
+    }, 500);
 });

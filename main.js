@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, dialog, shell } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, dialog, shell, ipcMain, globalShortcut } = require('electron');
 const path = require('path');
 
 // Start the embedded server
@@ -8,7 +8,37 @@ let mainWindow = null;
 let tray = null;
 let isFocusing = false; // Task 24
 let monitoringInterval = null; // Task 21
+let isLockModeEnabled = false;
+let lockShortcutsRegistered = false;
 const PORT = process.env.PORT || 3000;
+
+function notifyLockModeChanged() {
+    if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send('lock-mode-changed', isLockModeEnabled);
+    }
+}
+
+function registerLockShortcuts() {
+    if (lockShortcutsRegistered) return;
+    globalShortcut.register('F11', () => {
+        if (isLockModeEnabled && mainWindow && mainWindow.webContents) {
+            mainWindow.webContents.send('lock-escape-attempt', 'F11');
+        }
+    });
+    globalShortcut.register('CommandOrControl+Tab', () => {
+        if (isLockModeEnabled && mainWindow && mainWindow.webContents) {
+            mainWindow.webContents.send('lock-escape-attempt', 'Ctrl+Tab');
+        }
+    });
+    lockShortcutsRegistered = true;
+}
+
+function unregisterLockShortcuts() {
+    if (!lockShortcutsRegistered) return;
+    globalShortcut.unregister('F11');
+    globalShortcut.unregister('CommandOrControl+Tab');
+    lockShortcutsRegistered = false;
+}
 
 // ===== Create Main Window =====
 function createWindow() {
@@ -38,10 +68,53 @@ function createWindow() {
         mainWindow.show();
     });
 
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+        if (!isLockModeEnabled) return;
+
+        const key = (input.key || '').toLowerCase();
+        const isF11 = key === 'f11';
+        const isCtrlTab = Boolean(input.control) && key === 'tab';
+
+        if (isF11 || isCtrlTab) {
+            event.preventDefault();
+            if (mainWindow && mainWindow.webContents) {
+                mainWindow.webContents.send('lock-escape-attempt', isF11 ? 'F11' : 'Ctrl+Tab');
+            }
+        }
+    });
+
+    mainWindow.on('leave-full-screen', () => {
+        if (!isLockModeEnabled) return;
+        mainWindow.setFullScreen(true);
+        if (mainWindow.webContents) {
+            mainWindow.webContents.send('lock-escape-attempt', 'leave-fullscreen');
+        }
+    });
+
+    mainWindow.on('minimize', (event) => {
+        if (!isLockModeEnabled) return;
+        event.preventDefault();
+        mainWindow.focus();
+        if (mainWindow.webContents) {
+            mainWindow.webContents.send('lock-escape-attempt', 'minimize');
+        }
+    });
+
     // Prevent closing — minimize to tray instead
     mainWindow.on('close', (event) => {
         if (!app.isQuitting) {
             event.preventDefault();
+
+            if (isLockModeEnabled) {
+                dialog.showMessageBox(mainWindow, {
+                    type: 'warning',
+                    title: 'Chế độ toàn màn hình đang bật',
+                    message: 'Không thể thoát hoặc thu nhỏ khi đang khóa màn hình.',
+                    detail: 'Hãy rời room và dùng nút Thoát chế độ toàn màn hình ở trang Home.',
+                    buttons: ['Đã hiểu']
+                });
+                return;
+            }
             
             // Task 24: Native OS warning during focus
             if (isFocusing) {
@@ -134,7 +207,6 @@ app.whenReady().then(() => {
     createTray();
 
     // IPC Handlers for OS-level features
-    const { ipcMain } = require('electron');
 
     // Task 6 & 19: Open OS Settings
     ipcMain.on('open-settings', (event, settingType) => {
@@ -143,6 +215,11 @@ app.whenReady().then(() => {
         } else if (settingType === 'focus') {
             shell.openExternal('ms-settings:quiethours');
         }
+    });
+
+    ipcMain.on('app-quit', () => {
+        app.isQuitting = true;
+        app.quit();
     });
 
     // Task 17: Pop-out Memo Window
@@ -216,6 +293,29 @@ app.whenReady().then(() => {
             monitoringInterval = null;
         }
     });
+
+    ipcMain.handle('enter-lock-mode', async () => {
+        if (!mainWindow) return false;
+        isLockModeEnabled = true;
+        registerLockShortcuts();
+        mainWindow.setFullScreen(true);
+        mainWindow.focus();
+        notifyLockModeChanged();
+        return true;
+    });
+
+    ipcMain.handle('exit-lock-mode', async () => {
+        if (!mainWindow) return false;
+        isLockModeEnabled = false;
+        unregisterLockShortcuts();
+        mainWindow.setFullScreen(false);
+        notifyLockModeChanged();
+        return true;
+    });
+});
+
+app.on('will-quit', () => {
+    unregisterLockShortcuts();
 });
 
 app.on('window-all-closed', () => {
