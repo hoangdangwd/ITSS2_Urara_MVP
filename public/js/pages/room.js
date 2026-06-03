@@ -13,7 +13,7 @@ const RoomPage = {
     /**
      * Enter room with real data from server
      */
-    enterRoom(roomData) {
+    async enterRoom(roomData) {
         this.currentRoom = roomData;
         this._showRoomScreen(roomData.name);
         this.renderMembers(roomData.members);
@@ -26,8 +26,41 @@ const RoomPage = {
 
         // Auto mute behavior (Task 9)
         this.micOn = false;
-        MediaManager.muteMic();
-        showToast('🔇 Mic của bạn đang được tắt tự động để tránh ồn', 4000); // 4s toast
+        this.cameraOn = false;
+
+        // Initialize WebRTC Manager
+        WebRTCManager.init();
+
+        // Initialize actual media devices (camera & microphone)
+        try {
+            // Request both camera and microphone permissions & stream
+            const stream = await MediaManager.requestAll();
+            
+            // Ensure tracks start as DISABLED (OFF) initially to respect default state
+            if (stream) {
+                stream.getVideoTracks().forEach(track => track.enabled = false);
+                stream.getAudioTracks().forEach(track => track.enabled = false);
+                
+                // Register local stream for WebRTC
+                WebRTCManager.setLocalStream(stream);
+            }
+            
+            showToast('🔇 Mic của bạn đang được tắt tự động để tránh ồn', 4000); // 4s toast
+        } catch (err) {
+            console.warn('[Room] Cannot request camera/microphone on enter:', err);
+            showToast('⚠️ Không thể tự động bật Camera/Mic: ' + err.message);
+        }
+
+        // Connect to all existing members in the room via WebRTC
+        const myId = SocketClient.getId();
+        if (roomData.members) {
+            roomData.members.forEach(member => {
+                if (member.id !== myId) {
+                    // We initiate the WebRTC connection/offer to all existing peers
+                    WebRTCManager.connectToPeer(member.id);
+                }
+            });
+        }
     },
 
     /**
@@ -75,6 +108,9 @@ const RoomPage = {
         this.currentRoom = null;
         this.cameraOn = false;
         this.micOn = false;
+        
+        // Clean up WebRTC peer connections
+        WebRTCManager.closeAll();
 
         document.getElementById('peer-room').classList.remove('active');
         document.getElementById('peer-home').classList.add('active');
@@ -207,20 +243,22 @@ const RoomPage = {
     },
 
     _renderMemberCard(member) {
-        const cameraHtml = member.cameraOn
-            ? `<div class="camera-active-view">
-                   <video data-peer-id="${member.id}" autoplay playsinline class="local-video"></video>
-                   <span class="big-emoji" style="display: none;">${member.avatar}</span>
-               </div><span class="camera-badge">📷 ON</span>`
-            : `<div class="camera-placeholder"><span class="camera-emoji">${member.avatar}</span><span>Camera tắt</span></div>`;
-        const dotClass = member.cameraOn ? 'online' : 'away';
-        // Task 11: Mic glow class and icon
+        const isCameraActive = member.cameraOn ? 'active' : '';
         const micGlowClass = member.micOn ? 'speaking-glow' : '';
+        const dotClass = member.cameraOn ? 'online' : 'away';
 
         return `
             <div class="member-card ${micGlowClass}" data-member-id="${member.id}">
-                <div class="member-camera ${member.cameraOn ? 'active' : ''}">
-                    ${cameraHtml}
+                <div class="member-camera ${isCameraActive}">
+                    <div class="camera-active-view" style="${member.cameraOn ? '' : 'display: none;'}">
+                        <video data-peer-id="${member.id}" autoplay playsinline class="local-video"></video>
+                        <span class="big-emoji" style="display: none;">${member.avatar}</span>
+                    </div>
+                    <div class="camera-placeholder" style="${member.cameraOn ? 'display: none;' : ''}">
+                        <span class="camera-emoji">${member.avatar}</span>
+                        <span>Camera tắt</span>
+                    </div>
+                    <span class="camera-badge" style="${member.cameraOn ? '' : 'display: none;'}">📷 ON</span>
                     <div class="member-mic-status ${member.micOn ? 'on' : 'off'}">
                         ${member.micOn ? '🎤' : '🔇'}
                     </div>
@@ -276,7 +314,20 @@ const RoomPage = {
                 const camBtn = document.getElementById('btn-camera-toggle');
                 if (camBtn) camBtn.textContent = '⏳ Đang bật...';
                 
-                const stream = await MediaManager.requestCamera();
+                let stream = MediaManager.getStream();
+                if (!stream || stream.getVideoTracks().length === 0) {
+                    stream = await MediaManager.requestCamera();
+                    WebRTCManager.setLocalStream(MediaManager.getStream());
+                    
+                    // Add video track to all active peer connections
+                    const videoTrack = MediaManager.getStream().getVideoTracks()[0];
+                    if (videoTrack) {
+                        WebRTCManager.addTrackToAllPeers(videoTrack, MediaManager.getStream());
+                    }
+                } else {
+                    MediaManager.cameraOn = true;
+                    stream.getVideoTracks().forEach(track => track.enabled = true);
+                }
                 this.cameraOn = true;
 
                 // Show real video preview in my card
@@ -284,19 +335,15 @@ const RoomPage = {
                 const videoEl = document.getElementById('my-video');
                 const placeholder = document.getElementById('my-camera-placeholder');
                 const badge = document.getElementById('my-camera-badge');
-                const camBtn = document.getElementById('btn-camera-toggle');
                 
-                if (videoEl && stream) {
-                    videoEl.srcObject = stream;
+                if (videoEl && MediaManager.getStream()) {
+                    videoEl.srcObject = MediaManager.getStream();
                     videoEl.style.display = 'block';
                 }
                 if (placeholder) placeholder.style.display = 'none';
                 if (badge) badge.style.display = '';
                 if (cam) cam.classList.add('active');
                 if (camBtn) camBtn.textContent = '📷 Tắt Camera';
-
-                // Set stream for WebRTC (ready for future upgrade)
-                WebRTCManager.setLocalStream(stream);
 
                 showToast('📷 Camera đã bật');
             } else {
@@ -336,30 +383,59 @@ const RoomPage = {
         }
     },
 
-    toggleMic() {
-        this.micOn = !this.micOn;
-        const btn = document.getElementById('btn-mic-toggle');
-        if (btn) {
-            btn.textContent = this.micOn ? '🔇 Tắt Mic' : '🎤 Bật Mic';
-        }
+    async toggleMic() {
+        try {
+            if (!this.micOn) {
+                const btn = document.getElementById('btn-mic-toggle');
+                if (btn) btn.textContent = '⏳ Đang bật...';
 
-        // Task 11: Update mic icon and glow
-        const myCard = document.getElementById('my-card');
-        const myMicIcon = document.getElementById('my-mic-icon');
-        if (myCard) {
-            if (this.micOn) myCard.classList.add('speaking-glow');
-            else myCard.classList.remove('speaking-glow');
-        }
-        if (myMicIcon) {
-            myMicIcon.textContent = this.micOn ? '🎤' : '🔇';
-            myMicIcon.className = 'member-mic-status ' + (this.micOn ? 'on' : 'off');
-        }
+                let stream = MediaManager.getStream();
+                if (!stream || stream.getAudioTracks().length === 0) {
+                    stream = await MediaManager.requestMicrophone();
+                    WebRTCManager.setLocalStream(MediaManager.getStream());
+                    
+                    // Add audio track to all active peer connections
+                    const audioTrack = MediaManager.getStream().getAudioTracks()[0];
+                    if (audioTrack) {
+                        WebRTCManager.addTrackToAllPeers(audioTrack, MediaManager.getStream());
+                    }
+                } else {
+                    MediaManager.micOn = true;
+                    stream.getAudioTracks().forEach(track => track.enabled = true);
+                }
+                this.micOn = true;
+                showToast('🎤 Microphone đã bật');
+            } else {
+                MediaManager.toggleMic();
+                this.micOn = false;
+                showToast('🔇 Microphone đã tắt');
+            }
 
-        if (SocketClient.connected) {
-            SocketClient.toggleMic(this.micOn);
-        }
+            const btn = document.getElementById('btn-mic-toggle');
+            if (btn) {
+                btn.textContent = this.micOn ? '🔇 Tắt Mic' : '🎤 Bật Mic';
+            }
 
-        showToast(this.micOn ? '🎤 Microphone đã bật' : '🔇 Microphone đã tắt');
+            // Task 11: Update mic icon and glow
+            const myCard = document.getElementById('my-card');
+            const myMicIcon = document.getElementById('my-mic-icon');
+            if (myCard) {
+                if (this.micOn) myCard.classList.add('speaking-glow');
+                else myCard.classList.remove('speaking-glow');
+            }
+            if (myMicIcon) {
+                myMicIcon.textContent = this.micOn ? '🎤' : '🔇';
+                myMicIcon.className = 'member-mic-status ' + (this.micOn ? 'on' : 'off');
+            }
+
+            if (SocketClient.connected) {
+                SocketClient.toggleMic(this.micOn);
+            }
+        } catch (err) {
+            showToast('⚠️ Không thể bật microphone: ' + err.message);
+            const btn = document.getElementById('btn-mic-toggle');
+            if (btn) btn.textContent = '🎤 Bật Mic';
+        }
     },
 
     // ===== Audio Mixer (Task 16) =====
@@ -487,6 +563,9 @@ const RoomPage = {
             const card = document.querySelector(`[data-member-id="${data.id}"]`);
             if (card) card.remove();
             this._appendChatMessage('Hệ thống', data.name + ' đã rời phòng', 'var(--text-muted)');
+            
+            // Clean up WebRTC Peer Connection
+            WebRTCManager.removePeer(data.id);
         });
 
         SocketClient.on('chat-message', (data) => {
@@ -505,10 +584,35 @@ const RoomPage = {
             const card = document.querySelector(`[data-member-id="${data.id}"]`);
             if (card) {
                 const cam = card.querySelector('.member-camera');
+                const activeView = card.querySelector('.camera-active-view');
+                const placeholder = card.querySelector('.camera-placeholder');
+                const badge = card.querySelector('.camera-badge');
+                const statusDot = card.querySelector('.status-dot');
+
                 if (data.cameraOn) {
-                    cam.classList.add('active');
+                    if (cam) cam.classList.add('active');
+                    if (activeView) activeView.style.display = '';
+                    if (placeholder) placeholder.style.display = 'none';
+                    if (badge) badge.style.display = '';
+                    if (statusDot) {
+                        statusDot.classList.remove('away');
+                        statusDot.classList.add('online');
+                    }
+                    
+                    // Re-attach stream if we have it
+                    const stream = WebRTCManager.remoteStreams.get(data.id);
+                    if (stream) {
+                        WebRTCManager._attachRemoteStream(data.id, stream);
+                    }
                 } else {
-                    cam.classList.remove('active');
+                    if (cam) cam.classList.remove('active');
+                    if (activeView) activeView.style.display = 'none';
+                    if (placeholder) placeholder.style.display = '';
+                    if (badge) badge.style.display = 'none';
+                    if (statusDot) {
+                        statusDot.classList.remove('online');
+                        statusDot.classList.add('away');
+                    }
                 }
             }
         });

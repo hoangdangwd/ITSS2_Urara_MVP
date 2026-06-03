@@ -55,8 +55,6 @@ const WebRTCManager = {
     createPeerConnection(peerId) {
         console.log('[WebRTC] Creating peer connection for', peerId);
         
-        // === FUTURE: Uncomment block này để bật WebRTC video thật ===
-        /*
         const pc = new RTCPeerConnection(this.config);
         
         // Thêm local tracks vào connection
@@ -93,11 +91,6 @@ const WebRTCManager = {
         
         this.peerConnections.set(peerId, pc);
         return pc;
-        */
-        
-        // MVP mode: Chỉ track peer metadata
-        this.peerConnections.set(peerId, { id: peerId, connected: true });
-        return null;
     },
 
     /**
@@ -128,48 +121,58 @@ const WebRTCManager = {
             videoEl.play().catch(() => {});
             console.log('[WebRTC] Attached remote stream to video element for', peerId);
         }
+        
+        const audioEl = document.querySelector(`audio.member-audio[data-member-id="${peerId}"]`);
+        if (audioEl) {
+            audioEl.srcObject = stream;
+            audioEl.play().catch(() => {});
+            console.log('[WebRTC] Attached remote stream to audio element for', peerId);
+        }
     },
 
     // === Signaling Handlers (sẵn sàng cho WebRTC thật) ===
 
     async handleOffer(data) {
         console.log('[WebRTC] Received offer from', data.from);
-        // FUTURE: Create answer and send back
-        /*
         let pc = this.peerConnections.get(data.from);
         if (!pc) pc = this.createPeerConnection(data.from);
         
-        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        
-        SocketClient.socket.emit('webrtc-answer', {
-            target: data.from,
-            answer: answer
-        });
-        */
+        try {
+            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            
+            SocketClient.socket.emit('webrtc-answer', {
+                target: data.from,
+                answer: answer
+            });
+        } catch (err) {
+            console.error('[WebRTC] Error handling offer from', data.from, err);
+        }
     },
 
     async handleAnswer(data) {
         console.log('[WebRTC] Received answer from', data.from);
-        // FUTURE: Set remote description
-        /*
         const pc = this.peerConnections.get(data.from);
         if (pc) {
-            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+            try {
+                await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+            } catch (err) {
+                console.error('[WebRTC] Error setting remote description for answer from', data.from, err);
+            }
         }
-        */
     },
 
     async handleIceCandidate(data) {
         console.log('[WebRTC] Received ICE candidate from', data.from);
-        // FUTURE: Add ICE candidate
-        /*
         const pc = this.peerConnections.get(data.from);
         if (pc && data.candidate) {
-            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+            try {
+                await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+            } catch (err) {
+                console.error('[WebRTC] Error adding ICE candidate from', data.from, err);
+            }
         }
-        */
     },
 
     /**
@@ -177,19 +180,60 @@ const WebRTCManager = {
      */
     async connectToPeer(peerId) {
         console.log('[WebRTC] Connecting to peer:', peerId);
-        this.createPeerConnection(peerId);
+        const pc = this.createPeerConnection(peerId);
         
-        // FUTURE: Create and send offer
-        /*
-        const pc = this.peerConnections.get(peerId);
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        
-        SocketClient.socket.emit('webrtc-offer', {
-            target: peerId,
-            offer: offer
+        if (pc) {
+            try {
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+                
+                SocketClient.socket.emit('webrtc-offer', {
+                    target: peerId,
+                    offer: offer
+                });
+            } catch (err) {
+                console.error('[WebRTC] Error creating offer for', peerId, err);
+            }
+        }
+    },
+
+    /**
+     * Add a track to all active peer connections
+     */
+    addTrackToAllPeers(track, stream) {
+        console.log('[WebRTC] Adding track to all peers:', track.kind);
+        this.peerConnections.forEach((pc, peerId) => {
+            const senders = pc.getSenders();
+            const alreadyAdded = senders.some(sender => sender.track === track);
+            if (!alreadyAdded) {
+                try {
+                    pc.addTrack(track, stream);
+                    this.renegotiate(peerId);
+                } catch (err) {
+                    console.error('[WebRTC] Error adding track to peer', peerId, err);
+                }
+            }
         });
-        */
+    },
+
+    /**
+     * Renegotiate connection with a peer
+     */
+    async renegotiate(peerId) {
+        const pc = this.peerConnections.get(peerId);
+        if (pc) {
+            try {
+                console.log('[WebRTC] Renegotiating connection with', peerId);
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+                SocketClient.socket.emit('webrtc-offer', {
+                    target: peerId,
+                    offer: offer
+                });
+            } catch (err) {
+                console.error('[WebRTC] Error during renegotiation with', peerId, err);
+            }
+        }
     },
 
     /**
