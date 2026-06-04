@@ -80,29 +80,27 @@ const LockMode = {
     async enter() {
         let entered = false;
 
-        if (window.electronAPI && window.electronAPI.enterLockMode) {
+        const isDesktopApp = Boolean(window.electronAPI?.enterLockMode);
+
+        if (isDesktopApp) {
             entered = await window.electronAPI.enterLockMode();
-        } else if (document.documentElement.requestFullscreen) {
+        } else {
             try {
                 await document.documentElement.requestFullscreen();
+                document.body.classList.add('lock-mode-browser');
                 entered = true;
             } catch (err) {
-                entered = false;
+                document.body.classList.add('lock-mode-browser');
+                showToast('⚠️ Browser không cho tự fullscreen. Đã bật chế độ giả lập fullscreen.', 3500, true);
+                entered = true;
             }
         }
 
-        if (!entered) {
-            showToast('⚠️ Không thể bật toàn màn hình trên thiết bị hiện tại.', 3500, true);
-            return false;
-        }
+        if (!entered) return false;
 
         this.enabled = true;
         this.attachListeners();
         this.updateExitButtonVisibility();
-
-        if (!window.electronAPI) {
-            showToast('ℹ️ Chế độ web chỉ chặn best-effort, không chặn tuyệt đối Alt+Tab/Win key.', 4000, true);
-        }
 
         return true;
     },
@@ -115,13 +113,15 @@ const LockMode = {
             return;
         }
 
-        if (window.electronAPI && window.electronAPI.exitLockMode) {
+        if (window.electronAPI?.exitLockMode) {
             await window.electronAPI.exitLockMode();
-        } else if (document.fullscreenElement && document.exitFullscreen) {
-            try {
-                await document.exitFullscreen();
-            } catch (err) {
-                // Browser may deny exit without trusted gesture; the same click is a trusted gesture.
+        } else {
+            document.body.classList.remove('lock-mode-browser');
+
+            if (document.fullscreenElement && document.exitFullscreen) {
+                try {
+                    await document.exitFullscreen();
+                } catch (err) {}
             }
         }
 
