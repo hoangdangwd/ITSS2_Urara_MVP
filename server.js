@@ -66,11 +66,17 @@ io.on('connection', (socket) => {
 
     // --- Create room ---
     socket.on('create-room', (data, callback) => {
+        const roomName = (data?.name || '').trim();
+        if (!roomName) {
+            if (callback) callback({ success: false, error: 'Vui lòng nhập tên phòng' });
+            return;
+        }
+
         const roomId = generateRoomCode();
         const room = {
             id: roomId,
             code: roomId,
-            name: data.name || 'Phòng học',
+            name: roomName,
             description: data.description || '',
             mode: data.mode || 'public',
             createdBy: socket.id,

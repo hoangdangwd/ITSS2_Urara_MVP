@@ -107,7 +107,17 @@ const HomePage = {
      * Show create room modal
      */
     showCreateRoom() {
-        document.getElementById('create-room-modal').classList.add('show');
+        const modal = document.getElementById('create-room-modal');
+        const nameInput = document.getElementById('room-name');
+        const descInput = document.getElementById('room-desc');
+
+        if (modal) modal.classList.add('show');
+        if (nameInput) {
+            nameInput.value = '';
+            nameInput.setCustomValidity('');
+            setTimeout(() => nameInput.focus(), 100);
+        }
+        if (descInput) descInput.value = '';
     },
 
     /**
@@ -141,9 +151,22 @@ const HomePage = {
      * Create room and join
      */
     async createAndJoin() {
-        const name = document.getElementById('room-name').value.trim() || 'Phòng học';
-        const desc = document.getElementById('room-desc').value.trim();
+        const nameInput = document.getElementById('room-name');
+        const descInput = document.getElementById('room-desc');
+        const name = nameInput?.value.trim() || '';
+        const desc = descInput?.value.trim() || '';
         const mode = document.querySelector('input[name="room-mode"]:checked')?.value || 'public';
+
+        if (!name) {
+            showToast('⚠️ Vui lòng nhập tên phòng');
+            if (nameInput) {
+                nameInput.setCustomValidity('Vui lòng nhập tên phòng');
+                nameInput.reportValidity();
+                nameInput.focus();
+                nameInput.addEventListener('input', () => nameInput.setCustomValidity(''), { once: true });
+            }
+            return;
+        }
 
         this.hideCreateRoom();
 
@@ -157,6 +180,8 @@ const HomePage = {
                         localStorage.setItem('lastRoomCode', joinResult.room.code || result.roomId);
                         showToast('🎉 Đã tạo và tham gia phòng!');
                     }
+                } else {
+                    showToast('⚠️ ' + (result.error || 'Không thể tạo phòng'));
                 }
             } catch (err) {
                 showToast('⚠️ Không thể tạo phòng: ' + err.message);

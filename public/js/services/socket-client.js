@@ -5,6 +5,7 @@
  */
 
 const SocketClient = {
+    serverUrl: 'https://itss2-urara-mvp-39i7.onrender.com',
     socket: null,
     connected: false,
     callbacks: {},
@@ -16,7 +17,7 @@ const SocketClient = {
     connect() {
         if (this.socket) return;
 
-        this.socket = io({
+        this.socket = io(this.serverUrl, {
             reconnection: true,
             reconnectionAttempts: 10,
             reconnectionDelay: 1000,
